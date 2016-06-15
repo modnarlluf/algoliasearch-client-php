@@ -60,8 +60,40 @@ Table of Contents
 
 
 
-Setup
-============
+<!--NO_HTML-->
+
+Guides & Tutorials
+================
+Check our [online guides](https://www.algolia.com/doc):
+ * [Data Formatting](https://www.algolia.com/doc/indexing/formatting-your-data)
+ * [Import and Synchronize data](https://www.algolia.com/doc/indexing/import-synchronize-data/php)
+ * [Autocomplete](https://www.algolia.com/doc/search/auto-complete)
+ * [Instant search page](https://www.algolia.com/doc/search/instant-search)
+ * [Filtering and Faceting](https://www.algolia.com/doc/search/filtering-faceting)
+ * [Sorting](https://www.algolia.com/doc/relevance/sorting)
+ * [Ranking Formula](https://www.algolia.com/doc/relevance/ranking)
+ * [Typo-Tolerance](https://www.algolia.com/doc/relevance/typo-tolerance)
+ * [Geo-Search](https://www.algolia.com/doc/geo-search/geo-search-overview)
+ * [Security](https://www.algolia.com/doc/security/best-security-practices)
+ * [API-Keys](https://www.algolia.com/doc/security/api-keys)
+ * [REST API](https://www.algolia.com/doc/rest)
+
+
+<!--/NO_HTML-->
+
+
+
+
+
+
+
+
+## Getting Started
+
+
+
+### Install and init `initIndex`
+
 To setup your project, follow these steps:
 
 
@@ -84,7 +116,7 @@ require __DIR__ . '/vendor/autoload.php';
 $client = new \AlgoliaSearch\Client('YourApplicationID', 'YourAPIKey');
 ```
 
-### Framework Integrations
+#### Framework Integrations
 
 If you're a Symfony or Laravel user; you're probably looking for the following integrations:
 
@@ -94,8 +126,7 @@ If you're a Symfony or Laravel user; you're probably looking for the following i
 
 
 
-Quick Start
--------------
+### Quick Start
 
 
 In 30 seconds, this quick start tutorial will show you how to index and search objects.
@@ -189,34 +220,127 @@ function searchCallback(err, content) {
 
 
 
-<!--NO_HTML-->
+## Querying
 
-Guides & Tutorials
-================
-Check our [online guides](https://www.algolia.com/doc):
- * [Data Formatting](https://www.algolia.com/doc/indexing/formatting-your-data)
- * [Import and Synchronize data](https://www.algolia.com/doc/indexing/import-synchronize-data/php)
- * [Autocomplete](https://www.algolia.com/doc/search/auto-complete)
- * [Instant search page](https://www.algolia.com/doc/search/instant-search)
- * [Filtering and Faceting](https://www.algolia.com/doc/search/filtering-faceting)
- * [Sorting](https://www.algolia.com/doc/relevance/sorting)
- * [Ranking Formula](https://www.algolia.com/doc/relevance/ranking)
- * [Typo-Tolerance](https://www.algolia.com/doc/relevance/typo-tolerance)
- * [Geo-Search](https://www.algolia.com/doc/geo-search/geo-search-overview)
- * [Security](https://www.algolia.com/doc/security/best-security-practices)
- * [API-Keys](https://www.algolia.com/doc/security/api-keys)
- * [REST API](https://www.algolia.com/doc/rest)
+### Search in an index - `search`
 
 
-<!--/NO_HTML-->
+**Notes:** If you are building a web application, you may be more interested in using our [JavaScript client](https://github.com/algolia/algoliasearch-client-js) to perform queries. It brings two benefits:
+  * Your users get a better response time by not going through your servers
+  * It will offload unnecessary tasks from your servers.
+
+
+To perform a search, you only need to initialize the index and perform a call to the search function.
+
+The search query allows only to retrieve 1000 hits, if you need to retrieve more than 1000 hits for seo, you can use [Backup / Retrieve all index content](#backup--export-an-index)
+
+```php
+$index = $client->initIndex('contacts');
+$res = $index->search('query string');
+$res = $index->search('query string', ['attributesToRetrieve' => 'fistname,lastname', 'hitsPerPage' => 50]);
+```
+
+The server response will look like:
+
+```json
+{
+  "hits": [
+    {
+      "firstname": "Jimmie",
+      "lastname": "Barninger",
+      "objectID": "433",
+      "_highlightResult": {
+        "firstname": {
+          "value": "<em>Jimmie</em>",
+          "matchLevel": "partial"
+        },
+        "lastname": {
+          "value": "Barninger",
+          "matchLevel": "none"
+        },
+        "company": {
+          "value": "California <em>Paint</em> & Wlpaper Str",
+          "matchLevel": "partial"
+        }
+      }
+    }
+  ],
+  "page": 0,
+  "nbHits": 1,
+  "nbPages": 1,
+  "hitsPerPage": 20,
+  "processingTimeMS": 1,
+  "query": "jimmie paint",
+  "params": "query=jimmie+paint&attributesToRetrieve=firstname,lastname&hitsPerPage=50"
+}
+```
+
+
+
+
+### Multiple queries - `multipleQueries`
+
+You can send multiple queries with a single API call using a batch of queries:
+
+```php
+// perform 3 queries in a single API call:
+//  - 1st query targets index `categories`
+//  - 2nd and 3rd queries target index `products`
+$queries = [
+    ['indexName' => 'categories', 'query' => $myQueryString, 'hitsPerPage' => 3],
+    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 3, 'facetFilters' => 'promotion'],
+    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 10]
+];
+
+$results = $client->multipleQueries($queries);
+
+var_dump(results['results']):
+```
+
+The resulting JSON answer contains a ```results``` array storing the underlying queries answers. The answers order is the same than the requests order.
+
+You can specify a `strategy` parameter to optimize your multiple queries:
+- `none`: Execute the sequence of queries until the end.
+- `stopIfEnoughMatches`: Execute the sequence of queries until the number of hits is reached by the sum of hits.
 
 
 
 
 
 
-Add a new object to the Index
-==================
+
+### Find by ids - `getObject(s)`
+
+You can easily retrieve an object using its `objectID` and optionally specify a comma separated list of attributes you want:
+
+```php
+// Retrieves all attributes
+$index->getObject('myID');
+
+// Retrieves firstname and lastname attributes
+$index->getObject('myID', 'firstname,lastname');
+
+// Retrieves only the firstname attribute
+$index->getObject('myID', 'firstname');
+```
+
+You can also retrieve a set of objects:
+
+```php
+$index->getObjects(['myID1', 'myID2']);
+```
+
+
+
+
+
+
+
+
+
+## Indexing
+
+### Add objects - `addObject(s)`
 
 Each entry in an index has a unique identifier called `objectID`. There are two ways to add an entry to the index:
 
@@ -249,8 +373,11 @@ $res = $index->addObject(
 echo 'objectID=' . $res['objectID'] . "\n";
 ```
 
-Update an existing object in the Index
-==================
+
+
+
+
+### Update objects - `saveObject(s)`
 
 You have three options when updating an existing object:
 
@@ -270,6 +397,11 @@ $index->saveObject(
     ]
 );
 ```
+
+
+
+
+### Partial update objects - `partialUpdateObject(s)`
 
 You have many ways to update an object's attributes:
 
@@ -352,63 +484,209 @@ $index->partialUpdateObject(
 Note: Here we are decrementing the value by `42`. To decrement just by one, put
 `value:1`.
 
-Search
-==================
 
 
-**Notes:** If you are building a web application, you may be more interested in using our [JavaScript client](https://github.com/algolia/algoliasearch-client-js) to perform queries. It brings two benefits:
-  * Your users get a better response time by not going through your servers
-  * It will offload unnecessary tasks from your servers.
 
 
-To perform a search, you only need to initialize the index and perform a call to the search function.
+### Delete objects - `deleteObject(s)`
 
-The search query allows only to retrieve 1000 hits, if you need to retrieve more than 1000 hits for seo, you can use [Backup / Retrieve all index content](#backup--export-an-index)
+You can delete an object using its `objectID`:
 
 ```php
-$index = $client->initIndex('contacts');
-$res = $index->search('query string');
-$res = $index->search('query string', ['attributesToRetrieve' => 'fistname,lastname', 'hitsPerPage' => 50]);
+$index->deleteObject('myID');
 ```
 
-The server response will look like:
 
-```json
-{
-  "hits": [
-    {
-      "firstname": "Jimmie",
-      "lastname": "Barninger",
-      "objectID": "433",
-      "_highlightResult": {
-        "firstname": {
-          "value": "<em>Jimmie</em>",
-          "matchLevel": "partial"
-        },
-        "lastname": {
-          "value": "Barninger",
-          "matchLevel": "none"
-        },
-        "company": {
-          "value": "California <em>Paint</em> & Wlpaper Str",
-          "matchLevel": "partial"
-        }
-      }
-    }
-  ],
-  "page": 0,
-  "nbHits": 1,
-  "nbPages": 1,
-  "hitsPerPage": 20,
-  "processingTimeMS": 1,
-  "query": "jimmie paint",
-  "params": "query=jimmie+paint&attributesToRetrieve=firstname,lastname&hitsPerPage=50"
-}
+
+
+
+### Delete by query - `deleteByQuery`
+
+You can delete all objects matching a single query with the following code. Internally, the API client performs the query, deletes all matching hits, and waits until the deletions have been applied.
+
+
+```php
+$params = [];
+$index->deleteByQuery('John', $params);
 ```
+
+
+
+
+
+### Wait for an indexing operation - `waitTask`
+
+All write operations in Algolia are asynchronous by design.
+
+It means that when you add or update an object to your index, our servers will
+reply to your request with a `taskID` as soon as they understood the write
+operation.
+
+The actual insert and indexing will be done after replying to your code.
+
+You can wait for a task to complete using the `waitTask` method on the `taskID` returned by a write operation.
+
+For example, to wait for indexing of a new object:
+```php
+$res = $index->addObject(
+    [
+        'firstname' => 'Jimmie',
+        'lastname'  => 'Barninger'
+    ]
+);
+$index->waitTask($res['taskID']);
+```
+
+If you want to ensure multiple objects have been indexed, you only need to check
+the biggest `taskID`.
+
+
+
+### Custom batch - `batch`
+
+You may want to perform multiple operations with one API call to reduce latency.
+We expose four methods to perform batch operations:
+ * `addObjects`: Add an array of objects using automatic `objectID` assignment.
+ * `saveObjects`: Add or update an array of objects that contains an `objectID` attribute.
+ * `deleteObjects`: Delete an array of objectIDs.
+ * `partialUpdateObjects`: Partially update an array of objects that contain an `objectID` attribute (only specified attributes will be updated).
+
+Example using automatic `objectID` assignment:
+```php
+$res = $index->addObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'myID1'
+        ]
+    ]
+);
+```
+
+Example with user defined `objectID` (add or update):
+```php
+$res = $index->saveObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'Speach',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
+
+Example that deletes a set of records:
+```php
+$res = $index->deleteObjects(["myID1", "myID2"]);
+```
+
+Example that updates only the `firstname` attribute:
+```php
+$res = $index->partialUpdateObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
+
+
+Custom batch:
+```php
+$res = $index->batch(
+    [
+        'requests' => [
+            [
+                'action' => 'addObject',
+                'body'   => ['firstname' => 'Jimmie', 'lastname' => 'Barninger']
+            ],
+            [
+                'action' => 'addObject',
+                'body'   => ['Warren' => 'Jimmie', 'lastname' => 'Speach']
+            ],
+            [
+                'action'   => 'updateObject',
+                'objectID' => 'myID3',
+                'body'     => ['firstname' => 'Rob']
+            ],
+        ]
+    ]
+);
+```
+
+
+If you have one index per user, you may want to perform a batch operations across severals indexes.
+We expose a method to perform this type of batch:
+```php
+$res = $index->batch(
+    [
+        [
+            'action'    => 'addObject',
+            'indexName' => 'index1',
+            [
+                'firstname' => 'Jimmie',
+                'lastname'  => 'Barninger'
+            ]
+        ],
+        [
+            'action'    => 'addObject',
+            'indexName' => 'index1',
+            [
+                'firstname' => 'Warren',
+                'lastname'  => 'myID1'
+            ]
+        ]
+    ]
+);
+```
+
+The attribute **action** can have these values:
+- addObject
+- updateObject
+- partialUpdateObject
+- partialUpdateObjectNoCreate
+- deleteObject
+
+## Settings
+
+### Get settings - `getSettings`
+
+You can retrieve settings:
+
+```php
+$settings = $index->getSettings();
+var_dump($settings);
+```
+
+### Set settings - `setSettings`
+
+```php
+$index->setSettings(array("customRanking" => array("desc(followers)")));
+```
+
+## Parameters
+
+### Search Parameters
 
 You can use the following optional arguments:
 
-## Full Text Search Parameters
+#### Full Text Search Parameters
 <table><tbody>
 
   
@@ -710,7 +988,7 @@ You can use the following optional arguments:
   
 </tbody></table>
 
-## Pagination Parameters
+#### Pagination Parameters
 
 <table><tbody>
 
@@ -751,7 +1029,7 @@ You can use the following optional arguments:
 </tbody></table>
 
 
-## Geo-search Parameters
+#### Geo-search Parameters
 <table><tbody>
   
 
@@ -839,7 +1117,7 @@ You can use the following optional arguments:
 </tbody></table>
 
 
-## Parameters to Control Results Content
+#### Parameters to Control Results Content
 
 <table><tbody>
   
@@ -981,7 +1259,7 @@ You can use the following optional arguments:
 
 </tbody></table>
 
-## Numeric Search Parameters
+#### Numeric Search Parameters
 
 <table><tbody>
   
@@ -1008,7 +1286,7 @@ You can also mix OR and AND operators. The OR operator is defined with a parenth
 
 You can also use a string array encoding (for example `numericFilters: ["price>100","price<1000"]`).
 
-## Category Search Parameters
+#### Category Search Parameters
 
 <table><tbody>
   
@@ -1031,7 +1309,7 @@ You can also use a string array encoding (for example `numericFilters: ["price>1
     
 </tbody></table>
 
-## Faceting Parameters
+#### Faceting Parameters
 
 <table><tbody>
 
@@ -1090,7 +1368,7 @@ You can also use a string array encoding (for example `numericFilters: ["price>1
 
 </tbody></table>
 
-## Unified Filter Parameter (SQL - like)
+#### Unified Filter Parameter (SQL - like)
 
 <table><tbody>
 
@@ -1133,7 +1411,7 @@ You can also use a string array encoding (for example `numericFilters: ["price>1
 * It's not possible to negate a group, it's only possible to negate a filter:  NOT(FILTER1 OR (FILTER2) is not allowed.
 
 
-## Distinct Parameter
+#### Distinct Parameter
 
 <table><tbody>
 
@@ -1158,97 +1436,7 @@ You can also use a string array encoding (for example `numericFilters: ["price>1
 
 To get a full understanding of how `Distinct` works, you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
 
-
-
-
-
-Multiple queries
-==================
-
-You can send multiple queries with a single API call using a batch of queries:
-
-```php
-// perform 3 queries in a single API call:
-//  - 1st query targets index `categories`
-//  - 2nd and 3rd queries target index `products`
-$queries = [
-    ['indexName' => 'categories', 'query' => $myQueryString, 'hitsPerPage' => 3],
-    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 3, 'facetFilters' => 'promotion'],
-    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 10]
-];
-
-$results = $client->multipleQueries($queries);
-
-var_dump(results['results']):
-```
-
-The resulting JSON answer contains a ```results``` array storing the underlying queries answers. The answers order is the same than the requests order.
-
-You can specify a `strategy` parameter to optimize your multiple queries:
-- `none`: Execute the sequence of queries until the end.
-- `stopIfEnoughMatches`: Execute the sequence of queries until the number of hits is reached by the sum of hits.
-
-
-
-Get an object
-==================
-
-You can easily retrieve an object using its `objectID` and optionally specify a comma separated list of attributes you want:
-
-```php
-// Retrieves all attributes
-$index->getObject('myID');
-
-// Retrieves firstname and lastname attributes
-$index->getObject('myID', 'firstname,lastname');
-
-// Retrieves only the firstname attribute
-$index->getObject('myID', 'firstname');
-```
-
-You can also retrieve a set of objects:
-
-```php
-$index->getObjects(['myID1', 'myID2']);
-```
-
-Delete an object
-==================
-
-You can delete an object using its `objectID`:
-
-```php
-$index->deleteObject('myID');
-```
-
-Delete by query
-==================
-
-You can delete all objects matching a single query with the following code. Internally, the API client performs the query, deletes all matching hits, and waits until the deletions have been applied.
-
-
-```php
-$params = [];
-$index->deleteByQuery('John', $params);
-```
-
-
-Index Settings
-==================
-
-You can easily retrieve or update settings:
-
-```php
-$settings = $index->getSettings();
-var_dump($settings);
-```
-
-```php
-$index->setSettings(['customRanking' => ['desc(followers)']]);
-```
-
-
-## Indexing parameters
+### Indexing parameters
 
 <table><tbody>
 
@@ -1466,7 +1654,7 @@ To get a full description of how the Ranking works, you can have a look at our <
 
 </tbody></table>
 
-## Query expansion
+### Query expansion
 
 <table><tbody>
   
@@ -1597,7 +1785,7 @@ To get a full description of how the Ranking works, you can have a look at our <
 
 </tbody></table>
 
-## Default query parameters (can be overwritten by queries)
+### Default query parameters (can be overwritten by queries)
 
 <table><tbody>
   
@@ -1891,8 +2079,10 @@ To get a full description of how the Ranking works, you can have a look at our <
 
 
 
-List indices
-==================
+## Manage Indices
+
+### List indices - `listIndices`
+
 You can list all your indices along with their associated information (number of entries, disk size, etc.) with the `listIndexes` method:
 
 ```php
@@ -1903,8 +2093,10 @@ var_dump($client->listIndexes());
 
 
 
-Delete an index
-==================
+
+
+### Delete index - `deleteIndex`
+
 You can delete an index using its name:
 
 ```php
@@ -1914,176 +2106,29 @@ $client->deleteIndex('contacts');
 
 
 
+### Clear index - `clearIndex`
 
-Clear an index
-==================
 You can delete the index contents without removing settings and index specific API keys by using the clearIndex command:
 
 ```php
 $index->clearIndex();
 ```
 
-Wait indexing
+### Copy index - `copyIndex`
 ==================
 
-All write operations in Algolia are asynchronous by design.
-
-It means that when you add or update an object to your index, our servers will
-reply to your request with a `taskID` as soon as they understood the write
-operation.
-
-The actual insert and indexing will be done after replying to your code.
-
-You can wait for a task to complete using the `waitTask` method on the `taskID` returned by a write operation.
-
-For example, to wait for indexing of a new object:
-```php
-$res = $index->addObject(
-    [
-        'firstname' => 'Jimmie',
-        'lastname'  => 'Barninger'
-    ]
-);
-$index->waitTask($res['taskID']);
-```
-
-If you want to ensure multiple objects have been indexed, you only need to check
-the biggest `taskID`.
-
-Batch writes
-==================
-
-You may want to perform multiple operations with one API call to reduce latency.
-We expose four methods to perform batch operations:
- * `addObjects`: Add an array of objects using automatic `objectID` assignment.
- * `saveObjects`: Add or update an array of objects that contains an `objectID` attribute.
- * `deleteObjects`: Delete an array of objectIDs.
- * `partialUpdateObjects`: Partially update an array of objects that contain an `objectID` attribute (only specified attributes will be updated).
-
-Example using automatic `objectID` assignment:
-```php
-$res = $index->addObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'myID1'
-        ]
-    ]
-);
-```
-
-Example with user defined `objectID` (add or update):
-```php
-$res = $index->saveObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'Speach',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
-Example that deletes a set of records:
-```php
-$res = $index->deleteObjects(["myID1", "myID2"]);
-```
-
-Example that updates only the `firstname` attribute:
-```php
-$res = $index->partialUpdateObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
-
-Custom batch:
-```php
-$res = $index->batch(
-    [
-        'requests' => [
-            [
-                'action' => 'addObject',
-                'body'   => ['firstname' => 'Jimmie', 'lastname' => 'Barninger']
-            ],
-            [
-                'action' => 'addObject',
-                'body'   => ['Warren' => 'Jimmie', 'lastname' => 'Speach']
-            ],
-            [
-                'action'   => 'updateObject',
-                'objectID' => 'myID3',
-                'body'     => ['firstname' => 'Rob']
-            ],
-        ]
-    ]
-);
-```
-
-
-If you have one index per user, you may want to perform a batch operations across severals indexes.
-We expose a method to perform this type of batch:
-```php
-$res = $index->batch(
-    [
-        [
-            'action'    => 'addObject',
-            'indexName' => 'index1',
-            [
-                'firstname' => 'Jimmie',
-                'lastname'  => 'Barninger'
-            ]
-        ],
-        [
-            'action'    => 'addObject',
-            'indexName' => 'index1',
-            [
-                'firstname' => 'Warren',
-                'lastname'  => 'myID1'
-            ]
-        ]
-    ]
-);
-```
-
-The attribute **action** can have these values:
-- addObject
-- updateObject
-- partialUpdateObject
-- partialUpdateObjectNoCreate
-- deleteObject
-
-Copy / Move an index
-==================
-
-You can easily copy or rename an existing index using the `copy` and `move` commands.
+You can copy using the `copy` command.
 **Note**: Move and copy commands overwrite the destination index.
 
 ```php
-// Rename MyIndex in MyIndexNewName
-$res = $client->moveIndex('MyIndex', 'MyIndexNewName');
 // Copy MyIndex in MyIndexCopy
 $res = $client->copyIndex('MyIndex', 'MyIndexCopy');
 ```
+
+
+### Move index - `moveIndex`
+
+You can move using the `move` command.
 
 The move command is particularly useful if you want to update a big index atomically from one version to another. For example, if you recreate your index `MyIndex` each night from a database by batch, you only need to:
  1. Import your database into a new index using [batches](#batch-writes). Let's call this new index `MyNewIndex`.
@@ -2094,17 +2139,102 @@ The move command is particularly useful if you want to update a big index atomic
 $res = $client->moveIndex('MyNewIndex', 'MyIndex');
 ```
 
-Backup / Export an index
-==================
 
-The `search` method cannot return more than 1,000 results. If you need to
-retrieve all the content of your index (for backup, SEO purposes or for running
-a script on it), you should use the `browse` method instead. This method lets
-you retrieve objects beyond the 1,000 limit.
+### Get Logs - `getLogs`
 
-This method is optimized for speed. To make it fast, distinct, typo-tolerance,
-word proximity, geo distance and number of matched words are disabled. Results
-are still returned ranked by attributes and custom ranking.
+You can retrieve the latest logs via this API. Each log entry contains:
+ * Timestamp in ISO-8601 format
+ * Client IP
+ * Request Headers (API Key is obfuscated)
+ * Request URL
+ * Request method
+ * Request body
+ * Answer HTTP code
+ * Answer body
+ * SHA1 ID of entry
+
+You can retrieve the logs of your last 1,000 API calls and browse them using the offset/length parameters:
+
+<table><tbody>
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>offset</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the first entry to retrieve (0-based, 0 is the most recent log entry). Defaults to 0.</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>length</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the maximum number of entries to retrieve starting at the offset. Defaults to 10. Maximum allowed value: 1,000.</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>onlyErrors</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Retrieve only logs with an HTTP code different than 200 or 201. (deprecated)</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>type</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the type of logs to retrieve:</p>
+
+<ul>
+<li><code>query</code>: Retrieve only the queries.</li>
+<li><code>build</code>: Retrieve only the build operations.</li>
+<li><code>error</code>: Retrieve only the errors (same as <code>onlyErrors</code> parameters).</li>
+</ul>
+
+      </td>
+    </tr>
+    
+</tbody></table>
+
+```php
+// Get last 10 log entries
+$res = $client->getLogs();
+
+// Get last 100 log entries
+$res = $client->getLogs(0, 100);
+```
 
 
 It will return a `cursor` alongside your data, that you can then use to retrieve
@@ -2129,15 +2259,78 @@ $next_cursor = $this->index->browseFrom('', ['numericFilters' => 'i<42'])['curso
 
 
 
-API Keys
-==================
+
+
+
+
+## Api Keys
 
 The **admin** API key provides full control of all your indices. *The admin API key should always be kept secure; do NOT use it from outside your back-end.*
 
 You can also generate user API keys to control security.
 These API keys can be restricted to a set of operations or/and restricted to a given index.
 
-## List API keys
+
+
+### Secured API keys - `generateSecuredApiKey`
+
+You may have a single index containing **per user** data. In that case, all records should be tagged with their associated `user_id` in order to add a `tagFilters=user_42` filter at query time to retrieve only what a user has access to. If you're using the [JavaScript client](http://github.com/algolia/algoliasearch-client-js), it will result in a security breach since the user is able to modify the `tagFilters` you've set by modifying the code from the browser. To keep using the JavaScript client (recommended for optimal latency) and target secured records, you can generate a secured API key from your backend:
+
+```php
+// generate a public API key for user 42. Here, records are tagged with:
+//  - 'user_XXXX' if they are visible by user XXXX
+$public_key = $client->generateSecuredApiKey('YourSearchOnlyApiKey', ['filters' => '_tags:user_42']);
+```
+
+This public API key can then be used in your JavaScript code as follow:
+
+```js
+var client = algoliasearch('YourApplicationID', '<%= public_api_key %>');
+
+var index = client.initIndex('indexName')
+
+index.search('something', function(err, content) {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log(content);
+});
+```
+
+You can mix rate limits and secured API keys by setting a `userToken` query parameter at API key generation time. When set, a unique user will be identified by her `IP + user_token` instead of only by her `IP`. This allows you to restrict a single user to performing a maximum of `N` API calls per hour, even if she shares her `IP` with another user.
+
+```php
+// generate a public API key for user 42. Here, records are tagged with:
+//  - 'user_XXXX' if they are visible by user XXXX
+$public_key = $client->generateSecuredApiKey(
+    'YourSearchOnlyApiKey',
+    ['filters' => 'user_42', 'userToken' => 'user_42']
+);
+```
+
+This public API key can then be used in your JavaScript code as follow:
+
+```js
+var client = algoliasearch('YourApplicationID', '<%= public_api_key %>');
+
+var index = client.initIndex('indexName')
+
+index.search('another query', function(err, content) {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  console.log(content);
+});
+```
+
+
+
+
+### List api keys - `listApiKeys`
 
 To list existing keys, you can use:
 
@@ -2160,7 +2353,8 @@ Each key is defined by a set of permissions that specify the authorized actions.
  * **analytics**: Allowed to retrieve analytics through the analytics API.
  * **listIndexes**: Allowed to list all accessible indexes.
 
-## Create API keys
+
+### Add user key - `addUserKey`
 
 To create API keys:
 
@@ -2311,7 +2505,7 @@ $res = $client->addUserKey(params);
 echo 'key=' . $res['key'] . "\n";
 ```
 
-## Update API keys
+### Update user key - `updateUserKey`
 
 To update the permissions of an existing key:
  ```php
@@ -2323,16 +2517,8 @@ echo 'key=' . $res['key'] . "\n";
 $res = $index->updateUserKey('myAPIKey', ['search'], 300, 100, 20);
 echo 'key=' . $res['key'] . "\n";
 ```
-To get the permissions of a given key:
-```php
-// Gets the rights of a global key
-$res = $client->getUserKeyACL('f420238212c54dcfad07ea0aa6d5c45f');
 
-// Gets the rights of an index specific key
-$res = $index->getUserKeyACL('71671c38001bf3ac857bc82052485107');
-```
-
-## Delete API keys
+### Delete user key - `deleteUserKey`
 
 To delete an existing key:
 ```php
@@ -2343,165 +2529,14 @@ $res = $client->deleteUserKey('f420238212c54dcfad07ea0aa6d5c45f');
 $res = $index->deleteUserKey('71671c38001bf3ac857bc82052485107');
 ```
 
+### Get key permissions - `getUserKeyACL`
 
-
-## Secured API keys (frontend)
-
-You may have a single index containing **per user** data. In that case, all records should be tagged with their associated `user_id` in order to add a `tagFilters=user_42` filter at query time to retrieve only what a user has access to. If you're using the [JavaScript client](http://github.com/algolia/algoliasearch-client-js), it will result in a security breach since the user is able to modify the `tagFilters` you've set by modifying the code from the browser. To keep using the JavaScript client (recommended for optimal latency) and target secured records, you can generate a secured API key from your backend:
-
+To get the permissions of a given key:
 ```php
-// generate a public API key for user 42. Here, records are tagged with:
-//  - 'user_XXXX' if they are visible by user XXXX
-$public_key = $client->generateSecuredApiKey('YourSearchOnlyApiKey', ['filters' => '_tags:user_42']);
+// Gets the rights of a global key
+$res = $client->getUserKeyACL('f420238212c54dcfad07ea0aa6d5c45f');
+
+// Gets the rights of an index specific key
+$res = $index->getUserKeyACL('71671c38001bf3ac857bc82052485107');
 ```
-
-This public API key can then be used in your JavaScript code as follow:
-
-```js
-var client = algoliasearch('YourApplicationID', '<%= public_api_key %>');
-
-var index = client.initIndex('indexName')
-
-index.search('something', function(err, content) {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  console.log(content);
-});
-```
-
-You can mix rate limits and secured API keys by setting a `userToken` query parameter at API key generation time. When set, a unique user will be identified by her `IP + user_token` instead of only by her `IP`. This allows you to restrict a single user to performing a maximum of `N` API calls per hour, even if she shares her `IP` with another user.
-
-```php
-// generate a public API key for user 42. Here, records are tagged with:
-//  - 'user_XXXX' if they are visible by user XXXX
-$public_key = $client->generateSecuredApiKey(
-    'YourSearchOnlyApiKey',
-    ['filters' => 'user_42', 'userToken' => 'user_42']
-);
-```
-
-This public API key can then be used in your JavaScript code as follow:
-
-```js
-var client = algoliasearch('YourApplicationID', '<%= public_api_key %>');
-
-var index = client.initIndex('indexName')
-
-index.search('another query', function(err, content) {
-  if (err) {
-    console.error(err);
-    return;
-  }
-
-  console.log(content);
-});
-```
-
-
-
-
-Logs
-==================
-
-You can retrieve the latest logs via this API. Each log entry contains:
- * Timestamp in ISO-8601 format
- * Client IP
- * Request Headers (API Key is obfuscated)
- * Request URL
- * Request method
- * Request body
- * Answer HTTP code
- * Answer body
- * SHA1 ID of entry
-
-You can retrieve the logs of your last 1,000 API calls and browse them using the offset/length parameters:
-
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>offset</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the first entry to retrieve (0-based, 0 is the most recent log entry). Defaults to 0.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>length</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the maximum number of entries to retrieve starting at the offset. Defaults to 10. Maximum allowed value: 1,000.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>onlyErrors</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Retrieve only logs with an HTTP code different than 200 or 201. (deprecated)</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>type</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the type of logs to retrieve:</p>
-
-<ul>
-<li><code>query</code>: Retrieve only the queries.</li>
-<li><code>build</code>: Retrieve only the build operations.</li>
-<li><code>error</code>: Retrieve only the errors (same as <code>onlyErrors</code> parameters).</li>
-</ul>
-
-      </td>
-    </tr>
-    
-</tbody></table>
-
-```php
-// Get last 10 log entries
-$res = $client->getLogs();
-
-// Get last 100 log entries
-$res = $client->getLogs(0, 100);
-```
-
-
-
-
-
 
