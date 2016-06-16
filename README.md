@@ -276,8 +276,6 @@ The server response will look like:
 ```
 
 
-
-
 ### Multiple queries - `multipleQueries`
 
 You can send multiple queries with a single API call using a batch of queries:
@@ -374,7 +372,22 @@ echo 'objectID=' . $res['objectID'] . "\n";
 ```
 
 
-
+You may want to perform multiple operations with one API call to reduce latency.
+Example using automatic `objectID` assignment:
+```php
+$res = $index->addObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'myID1'
+        ]
+    ]
+);
+```
 
 
 ### Update objects - `saveObject(s)`
@@ -398,7 +411,24 @@ $index->saveObject(
 );
 ```
 
-
+You may want to perform multiple operations with one API call to reduce latency.
+Example with user defined `objectID` (add or update):
+```php
+$res = $index->saveObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'Speach',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
 
 
 ### Partial update objects - `partialUpdateObject(s)`
@@ -484,8 +514,22 @@ $index->partialUpdateObject(
 Note: Here we are decrementing the value by `42`. To decrement just by one, put
 `value:1`.
 
-
-
+You may want to perform multiple operations with one API call to reduce latency.
+Example that updates only the `firstname` attribute:
+```php
+$res = $index->partialUpdateObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
 
 
 ### Delete objects - `deleteObject(s)`
@@ -496,9 +540,11 @@ You can delete an object using its `objectID`:
 $index->deleteObject('myID');
 ```
 
-
-
-
+You may want to perform multiple operations with one API call to reduce latency.
+Example that deletes a set of records:
+```php
+$res = $index->deleteObjects(["myID1", "myID2"]);
+```
 
 ### Delete by query - `deleteByQuery`
 
@@ -540,96 +586,7 @@ $index->waitTask($res['taskID']);
 If you want to ensure multiple objects have been indexed, you only need to check
 the biggest `taskID`.
 
-
-
 ### Custom batch - `batch`
-
-You may want to perform multiple operations with one API call to reduce latency.
-We expose four methods to perform batch operations:
- * `addObjects`: Add an array of objects using automatic `objectID` assignment.
- * `saveObjects`: Add or update an array of objects that contains an `objectID` attribute.
- * `deleteObjects`: Delete an array of objectIDs.
- * `partialUpdateObjects`: Partially update an array of objects that contain an `objectID` attribute (only specified attributes will be updated).
-
-Example using automatic `objectID` assignment:
-```php
-$res = $index->addObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'myID1'
-        ]
-    ]
-);
-```
-
-Example with user defined `objectID` (add or update):
-```php
-$res = $index->saveObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'Speach',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
-Example that deletes a set of records:
-```php
-$res = $index->deleteObjects(["myID1", "myID2"]);
-```
-
-Example that updates only the `firstname` attribute:
-```php
-$res = $index->partialUpdateObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
-
-Custom batch:
-```php
-$res = $index->batch(
-    [
-        'requests' => [
-            [
-                'action' => 'addObject',
-                'body'   => ['firstname' => 'Jimmie', 'lastname' => 'Barninger']
-            ],
-            [
-                'action' => 'addObject',
-                'body'   => ['Warren' => 'Jimmie', 'lastname' => 'Speach']
-            ],
-            [
-                'action'   => 'updateObject',
-                'objectID' => 'myID3',
-                'body'     => ['firstname' => 'Rob']
-            ],
-        ]
-    ]
-);
-```
-
 
 If you have one index per user, you may want to perform a batch operations across severals indexes.
 We expose a method to perform this type of batch:
@@ -682,726 +639,613 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ## Parameters
 
-### Search Parameters
-
-You can use the following optional arguments:
-
-#### Full Text Search Parameters
-<table><tbody>
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>query</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The instant search query string, used to set the string you want to search in your index. If no query parameter is set, the textual search will match with all the objects.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>queryType</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>prefixLast</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Selects how the query words are interpreted. It can be one of the following values:</p>
-
-<ul>
-<li><code>prefixAll</code>: All query words are interpreted as prefixes. This option is not recommended.</li>
-<li><code>prefixLast</code>: Only the last word is interpreted as a prefix (default behavior).</li>
-<li><code>prefixNone</code>: No query word is interpreted as a prefix. This option is not recommended.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>removeWordsIfNoResults</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>none</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>This option is used to select a strategy in order to avoid having an empty result page. There are three different options:</p>
-
-<ul>
-<li><code>lastWords</code>: When a query does not return any results, the last word will be added as optional. The process is repeated with n-1 word, n-2 word, ... until there are results.</li>
-<li><code>firstWords</code>: When a query does not return any results, the first word will be added as optional. The process is repeated with second word, third word, ... until there are results.</li>
-<li><code>allOptional</code>: When a query does not return any results, a second trial will be made with all words as optional. This is equivalent to transforming the AND operand between query terms to an OR operand.</li>
-<li><code>none</code>: No specific processing is done when a query does not return any results (default behavior).</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>minWordSizefor1Typo</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>number</strong></em></div><div><em>Default: <strong>4</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The minimum number of characters in a query word to accept one typo in this word.<br/>Defaults to 4.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>minWordSizefor2Typos</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>number</strong></em></div><div><em>Default: <strong>8</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The minimum number of characters in a query word to accept two typos in this word.<br/>Defaults to 8.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>typoTolerance</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>This option allows you to control the number of typos allowed in the result set:</p>
-
-<ul>
-<li><code>true</code>: The typo tolerance is enabled and all matching hits are retrieved (default behavior).</li>
-<li><code>false</code>: The typo tolerance is disabled. All results with typos will be hidden.</li>
-<li><code>min</code>: Only keep results with the minimum number of typos. For example, if one result matches without typos, then all results with typos will be hidden.</li>
-<li><code>strict</code>: Hits matching with 2 typos are not retrieved if there are some matching without typos.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>allowTyposOnNumericTokens</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, disables typo tolerance on numeric tokens (numbers). Defaults to true.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>ignorePlural</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to true, plural won&#39;t be considered as a typo. For example, car and cars, or foot and feet will be considered as equivalent. Defaults to false.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>disableTypoToleranceOnAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>[]</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of attributes on which you want to disable typo tolerance (must be a subset of the <code>attributesToIndex</code> index setting). Attributes are separated with a comma such as <code>&quot;name,address&quot;</code>. You can also use JSON string array encoding such as <code>encodeURIComponent(&quot;[\&quot;name\&quot;,\&quot;address\&quot;]&quot;)</code>. By default, this list is empty.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>restrictSearchableAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>attributesToIndex</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of attributes you want to use for textual search (must be a subset of the <code>attributesToIndex</code> index setting). Attributes are separated with a comma such as <code>&quot;name,address&quot;</code>. You can also use JSON string array encoding such as <code>encodeURIComponent(&quot;[\&quot;name\&quot;,\&quot;address\&quot;]&quot;)</code>. By default, all attributes specified in the <code>attributesToIndex</code> settings are used to search.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>removeStopWords</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Remove the stop words from query before executing it. Defaults to false. Contains a list of stop words from 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu). In most use-cases, we don&#39;t recommend enabling this option.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>advancedSyntax</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>0 (false)</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Enables the advanced query syntax. Defaults to 0 (false).</p>
-
-<ul>
-<li><strong>Phrase query</strong>: A phrase query defines a particular sequence of terms. A phrase query is built by Algolia&#39;s query parser for words surrounded by <code>&quot;</code>. For example, <code>&quot;search engine&quot;</code> will retrieve records having <code>search</code> next to <code>engine</code> only. Typo tolerance is <em>disabled</em> on phrase queries.</li>
-<li><strong>Prohibit operator</strong>: The prohibit operator excludes records that contain the term after the <code>-</code> symbol. For example, <code>search -engine</code> will retrieve records containing <code>search</code> but not <code>engine</code>.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>analytics</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, this query will not be taken into account in the analytics feature. Defaults to true.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>synonyms</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, this query will not use synonyms defined in the configuration. Defaults to true.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>replaceSynonymsInHighlight</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, words matched via synonym expansion will not be replaced by the matched synonym in the highlight results. Defaults to true.</p>
-
-      </td>
-    </tr>
-    
-
-      
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>optionalWords</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>[]</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>A string that contains the comma separated list of words that should be considered as optional when found in the query.</p>
-
-      </td>
-    </tr>
-    
-  
-</tbody></table>
-
-#### Pagination Parameters
-
-<table><tbody>
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>page</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div><div><em>Default: <strong>0</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Pagination parameter used to select the page to retrieve.<br/>Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need to set <code>page=9</code>.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>hitsPerPage</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div><div><em>Default: <strong>20</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Pagination parameter used to select the number of hits per page. Defaults to 20.</p>
-
-      </td>
-    </tr>
-    
-
-</tbody></table>
-
-
-#### Geo-search Parameters
-<table><tbody>
-  
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>aroundLatLng</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Search for entries around a given latitude/longitude (specified as two floats separated by a comma).<br/>For example, <code>aroundLatLng=47.316669,5.016670</code>.</p>
-
-<p>By default the maximum distance is automatically guessed based on the density of the area but you can specify it manually in meters with the <strong>aroundRadius</strong> parameter. The precision for ranking can be set with <strong>aroundPrecision</strong> parameter. For example, if you set aroundPrecision=100, the distances will be considered by ranges of 100m, for example all distances 0 and 100m will be considered as identical for the &quot;geo&quot; ranking parameter.<br/><br/>When <strong>aroundRadius</strong> is not set, the radius is computed automatically using the density of the area, you can retrieve the computed radius in the <strong>automaticRadius</strong> attribute of the answer, you can also use the <strong>minimumAroundRadius</strong> query parameter to specify a minimum radius in meters for the automatic computation of <strong>aroundRadius</strong>.</p>
-
-<p>At indexing, you should specify geoloc of an object with the _geoloc attribute (in the form <code>&quot;_geoloc&quot;:{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800}</code> or <code>&quot;_geoloc&quot;:[{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800},{&quot;lat&quot;:48.547456, &quot;lng&quot;:2.972075}]</code> if you have several geo-locations in your record).</p>
-
-      </td>
-    </tr>
-    
-
-  
-
-  
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>aroundLatLngViaIP</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Search for entries around a given latitude/longitude automatically computed from user IP address.<br/>To enable it, use <code>aroundLatLngViaIP=true</code>.</p>
-
-<p>You can specify the maximum distance in meters with the <code>aroundRadius</code> parameter and the precision for ranking with <code>aroundPrecision</code>. For example, if you set aroundPrecision=100, two objects that are in the range 0-99m will be considered as identical in the ranking for the &quot;geo&quot; ranking parameter (same for 100-199, 200-299, ... ranges).</p>
-
-<p>At indexing, you should specify the geo location of an object with the <code>_geoloc</code> attribute in the form <code>{&quot;_geoloc&quot;:{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800}}</code>.</p>
-
-      </td>
-    </tr>
-    
-
-  
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>insideBoundingBox</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Search entries inside a given area defined by the two extreme points of a rectangle (defined by 4 floats: p1Lat,p1Lng,p2Lat,p2Lng).<br/>For example, <code>insideBoundingBox=47.3165,4.9665,47.3424,5.0201</code>).<br/>At indexing, you should specify geoloc of an object with the _geoloc attribute (in the form <code>&quot;_geoloc&quot;:{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800}</code> or <code>&quot;_geoloc&quot;:[{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800},{&quot;lat&quot;:48.547456, &quot;lng&quot;:2.972075}]</code> if you have several geo-locations in your record). You can use several bounding boxes (OR) by passing more than 4 values. For example instead of having 4 values you can pass 8 to search inside the UNION of two bounding boxes.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>insidePolygon</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Search entries inside a given area defined by a set of points (defined by a minimum of 6 floats: p1Lat,p1Lng,p2Lat,p2Lng,p3Lat,p3Long).<br/>For example <code>InsidePolygon=47.3165,4.9665,47.3424,5.0201,47.32,4.98</code>).<br/>At indexing, you should specify geoloc of an object with the _geoloc attribute (in the form <code>&quot;_geoloc&quot;:{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800}</code> or <code>&quot;_geoloc&quot;:[{&quot;lat&quot;:48.853409, &quot;lng&quot;:2.348800},{&quot;lat&quot;:48.547456, &quot;lng&quot;:2.972075}]</code> if you have several geo-locations in your record).</p>
-
-      </td>
-    </tr>
-    
-
-</tbody></table>
-
-
-#### Parameters to Control Results Content
-
-<table><tbody>
-  
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToRetrieve</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>A string that contains the list of attributes you want to retrieve in order to minimize the size of the JSON answer.</p>
-
-<p>Attributes are separated with a comma (for example <code>&quot;name,address&quot;</code>). You can also use a string array encoding (for example <code>[&quot;name&quot;,&quot;address&quot;]</code> ). By default, all attributes are retrieved. You can also use <code>*</code> to retrieve all values when an <strong>attributesToRetrieve</strong> setting is specified for your index.</p>
-
-<p><code>objectID</code> is always retrieved even when not specified.</p>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToHighlight</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>A string that contains the list of attributes you want to highlight according to the query. Attributes are separated by commas. You can also use a string array encoding (for example <code>[&quot;name&quot;,&quot;address&quot;]</code>). If an attribute has no match for the query, the raw value is returned. By default, all indexed attributes are highlighted. You can use <code>*</code> if you want to highlight all attributes. A matchLevel is returned for each highlighted attribute and can contain:</p>
-
-<ul>
-<li><strong>full</strong>: If all the query terms were found in the attribute.</li>
-<li><strong>partial</strong>: If only some of the query terms were found.</li>
-<li><strong>none</strong>: If none of the query terms were found.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToSnippet</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>A string that contains the list of attributes to snippet alongside the number of words to return (syntax is <code>attributeName:nbWords</code>). Attributes are separated by commas (Example: <code>attributesToSnippet=name:10,content:10</code>).</p>
-
-<p>You can also use a string array encoding (Example: <code>attributesToSnippet: [&quot;name:10&quot;,&quot;content:10&quot;]</code>). By default, no snippet is computed.</p>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>getRankingInfo</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to 1, the result hits will contain ranking information in the <code>_rankingInfo</code> attribute.</p>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>highlightPreTag</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div><div><em>Default: <strong>&lt;em&gt;</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the string that is inserted before the highlighted parts in the query result (defaults to <code>&lt;em&gt;</code>).</p>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>highlightPostTag</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div><div><em>Default: <strong>&lt;/em&gt;</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the string that is inserted after the highlighted parts in the query result (defaults to <code>&lt;/em&gt;</code>)</p>
-
-      </td>
-    </tr>
-    
-
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>snippetEllipsisText</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div><div><em>Default: <strong>''</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>String used as an ellipsis indicator when a snippet is truncated. Defaults to an empty string for all accounts created before 10/2/2016, and to <code>…</code> (UTF-8 U+2026) for accounts created after that date.</p>
-
-      </td>
-    </tr>
-    
-
-
-
-
-  
-
-</tbody></table>
-
-#### Numeric Search Parameters
-
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>numericFilters</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>A string that contains the comma separated list of numeric filters you want to apply. The filter syntax is <code>attributeName</code> followed by <code>operand</code> followed by <code>value</code>. Supported operands are <code>&lt;</code>, <code>&lt;=</code>, <code>=</code>, <code>&gt;</code> and <code>&gt;=</code>.</p>
-
-      </td>
-    </tr>
-    
-</tbody></table>
-
-You can easily perform range queries via the `:` operator. This is equivalent to combining a `>=` and `<=` operand. For example, `numericFilters=price:10 to 1000`.
-
-You can also mix OR and AND operators. The OR operator is defined with a parenthesis syntax. For example, `(code=1 AND (price:[0-100] OR price:[1000-2000]))` translates to `encodeURIComponent("code=1,(price:0 to 100,price:1000 to 2000)")`.
+### Query
+
+#### query
+
+- scope: `search`
+- type: `string`
+- default: `""`
+
+The instant search query string, used to set the string you want to search in your index. If no query parameter is set, the textual search will match with all the objects.
+
+### Query Strategy
+
+#### queryType
+
+- scope: `indexing`, `search`
+- default: `prefixLast`
+
+Selects how the query words are interpreted. It can be one of the following values:
+* `prefixAll`:
+All query words are interpreted as prefixes. This option is not recommended.
+* `prefixLast`:
+Only the last word is interpreted as a prefix (default behavior).
+* `prefixNone`:
+No query word is interpreted as a prefix. This option is not recommended.
+
+#### removeWordsIfNoResults
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `none`
+
+This option is used to select a strategy in order to avoid having an empty result page.
+There are four different options:
+- `lastWords`:
+When a query does not return any results, the last word will be added as optional.
+The process is repeated with n-1 word, n-2 word, ... until there are results.
+- `firstWords`:
+When a query does not return any results, the first word will be added as optional.
+The process is repeated with second word, third word, ... until there are results.
+- `allOptional`:
+When a query does not return any results, a second trial will be made with all words as optional.
+This is equivalent to transforming the AND operand between query terms to an OR operand.
+- `none`:
+No specific processing is done when a query does not return any results (default behavior).
+
+
+#### advancedSyntax
+
+- scope: `indexing`, `search`
+- default: `0 (false)`
+
+Enables the advanced query syntax.
+
+This syntax allow to do two things:
+* **Phrase query**: A phrase query defines a particular sequence of terms. A phrase query is built by Algolia's query parser for words surrounded by `"`. For example, `"search engine"` will retrieve records having `search` next to `engine` only. Typo tolerance is _disabled_ on phrase queries.
+* **Prohibit operator**: The prohibit operator excludes records that contain the term after the `-` symbol. For example, `search -engine` will retrieve records containing `search` but not `engine`.
+
+
+#### optionalWords
+
+- scope: `indexing`, `search`
+- default: `[]`
+
+A string that contains the comma separated list of words that should be considered as optional when found in the query.
+
+
+
+#### removeStopWords
+
+- scope: `indexing`, `search`
+- default: `false`
+
+Remove the stop words from query before executing it.
+Defaults to false. Contains a list of stop words from 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu).
+In most use-cases, **we don't recommend enabling this option**.
+
+### Attributes
+
+#### attributesToIndex
+
+- scope: `indexing`
+- type: `array of strings`
+
+The list of attributes you want index (i.e. to make searchable).
+
+If set to null, all textual and numerical attributes of your objects are indexed.
+Make sure you updated this setting to get optimal results.
+
+This parameter has two important uses:
+* **Limit the attributes to index**.
+<br/>For example, if you store the URL of a picture, you want to store it and be able to retrieve it,
+but you probably don't want to search in the URL.
+* **Control part of the ranking**.
+<br/> Matches in attributes at the beginning of the list will be considered more important than matches in attributes
+further down the list.
+In one attribute, matching text at the beginning of the attribute will be considered more important than text after.
+You can disable this behavior if you add your attribute inside `unordered(AttributeName)`.
+For example, `attributesToIndex: ["title", "unordered(text)"]`.
+You can decide to have the same priority for two attributes
+by passing them in the same string using a comma as a separator.
+For example `title` and `alternative_title` have the same priority in this example,
+which is different than text priority: `attributesToIndex:["title,alternative_title", "text"]`.
+To get a full description of how the Ranking works, you can have a look at our
+[Ranking guide](https://www.algolia.com/doc/relevance/ranking).
+
+#### numericAttributesToIndex
+
+- scope: `indexing`
+- type: `array of strings`
+
+All numerical attributes are automatically indexed as numerical filters
+(allowing filtering operations like `<` and `<=`).
+If you don't need filtering on some of your numerical attributes,
+you can specify this list to speed up the indexing.
+<br/> If you only need to filter on a numeric value with the operator '=',
+you can speed up the indexing by specifying the attribute with `equalOnly(AttributeName)`.
+The other operators will be disabled.
+
+#### attributesForFaceting
+
+- scope: `indexing`
+- type: `array of strings`
+
+The list of fields you want to use for faceting.
+All strings in the attribute selected for faceting are extracted and added as a facet.
+If set to null, no attribute is used for faceting.
+
+
+#### unretrievableAttributes
+
+- scope: `indexing`
+- type: `array of strings`
+- default: `null`
+
+The list of attributes that cannot be retrieved at query time.
+This feature allows you to have attributes that are used for indexing
+and/or ranking but cannot be retrieved
+
+**Warning**: for testing purposes, this setting is ignored when you're using the ADMIN API Key.
+
+
+#### restrictSearchableAttributes
+
+- scope: `search`
+- type: `array of strings`
+- default: `attributesToIndex`
+
+List of attributes you want to use for textual search (must be a subset of the `attributesToIndex` index setting).
+Attributes are separated with a comma such as `"name,address"`.
+You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
+By default, all attributes specified in the `attributesToIndex` settings are used to search.
+
+#### attributesToRetrieve
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+
+Default list of attributes to retrieve in objects. If set to null, all attributes are retrieved.
+
+### Ranking
+
+#### ranking
+
+- scope: `indexing`
+- type: `array of strings`
+- default: `['typo', 'geo', 'words', 'filters', 'proximity', 'attribute', 'exact', 'custom‘]`
+
+Controls the way results are sorted.
+
+We have nine available criterion:
+
+* `typo`: Sort according to number of typos.
+* `geo`: Sort according to decreasing distance when performing a geo location based search.
+* `words`: Sort according to the number of query words matched by decreasing order. This parameter is useful when you use the `optionalWords` query parameter to have results with the most matched words first.
+* `proximity`: Sort according to the proximity of the query words in hits.
+* `attribute`: Sort according to the order of attributes defined by attributesToIndex.
+* `exact`:
+  * If the user query contains one word: sort objects having an attribute that is exactly the query word before others. For example, if you search for the TV show "V", you want to find it with the "V" query and avoid getting all popular TV shows starting by the letter V before it.
+  * If the user query contains multiple words: sort according to the number of words that matched exactly (not as a prefix).
+* `custom`: Sort according to a user defined formula set in the `customRanking` attribute.
+* `asc(attributeName)`: Sort according to a numeric attribute using ascending order. `attributeName` can be the name of any numeric attribute in your records (integer, double or boolean).
+* `desc(attributeName)`: Sort according to a numeric attribute using descending order. `attributeName` can be the name of any numeric attribute in your records (integer, double or boolean).
+
+<br/>To get a full description of how the Ranking works,
+you can have a look at our [Ranking guide](https://www.algolia.com/doc/relevance/ranking).
+
+#### customRanking
+
+- scope: `indexing`
+- type: `array of strings`
+- default: `[]`
+
+Lets you specify part of the ranking.
+
+The syntax of this condition is an array of strings containing attributes
+prefixed by the asc (ascending order) or desc (descending order) operator.
+
+For example, `"customRanking" => ["desc(population)", "asc(name)"]`.
+
+To get a full description of how the Custom Ranking works,
+you can have a look at our [Ranking guide](https://www.algolia.com/doc/relevance/ranking).
+
+#### slaves
+
+- scope: `indexing`
+- type: `array of strings`
+- default: `[]`
+
+The list of indices on which you want to replicate all write operations.
+
+In order to get response times in milliseconds, we pre-compute part of the ranking during indexing.
+
+If you want to use different ranking configurations depending of the use case,
+you need to create one index per ranking configuration.
+
+This option enables you to perform write operations only on this index and automatically
+update slave indices with the same operations.
+
+### Typos
+
+#### minWordSizefor1Typo
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `4`
+
+The minimum number of characters needed to accept one typo.
+
+#### minWordSizefor2Typos
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `8`
+
+The minimum number of characters needed to accept two typos.
+
+
+#### typoTolerance
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `true`
+
+This option allows you to control the number of typos allowed in the result set:
+
+* `true`: The typo tolerance is enabled and all matching hits are retrieved (default behavior).
+* `false`: The typo tolerance is disabled. All results with typos will be hidden.
+* `min`: Only keep results with the minimum number of typos. For example, if one result matches without typos, then all results with typos will be hidden.
+* `strict`: Hits matching with 2 typos are not retrieved if there are some matching without typos.
+
+
+#### allowTyposOnNumericTokens
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `true`
+
+If set to false, disables typo tolerance on numeric tokens (numbers).
+
+#### ignorePlural
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `false`
+
+If set to true, plural won't be considered as a typo. For example, car and cars, or foot and feet will be considered as equivalent. Defaults to false.
+
+#### disableTypoToleranceOnAttributes
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: ``
+
+List of attributes on which you want to disable typo tolerance
+(must be a subset of the `attributesToIndex` index setting).
+
+Attributes are separated with a comma such as `"name,address"`.
+You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
+
+#### altCorrections
+
+- scope: `indexing`
+- type: `array of objects`
+- defaults: `[]`
+
+Specify alternative corrections that you want to consider.
+
+Each alternative correction is described by an object containing three attributes:
+* **word**: The word to correct.
+* **correction**: The corrected word.
+* **nbTypos** The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).
+
+For example:
+
+`"altCorrections": [ { "word" : "foot", "correction": "feet", "nbTypos": 1 }, { "word": "feet", "correction": "foot", "nbTypos": 1 } ]`.
+
+
+#### disablePrefixOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable prefix matching
+(must be a subset of the `attributesToIndex` index setting).
+
+This setting is useful on attributes that contain string that should not be matched as a prefix
+(for example a product SKU).
+
+
+#### disableExactOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable the computation of `exact` criteria
+(must be a subset of the `attributesToIndex` index setting).
+
+### Synonyms
+
+#### synonyms
+
+- scope: `search`
+- type: `boolean`
+- default: `true`
+
+If set to false, this query will not use synonyms defined in the configuration.
+
+#### replaceSynonymsInHighlight
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: true
+
+If set to false, words matched via synonym expansion will not be replaced by the matched synonym
+in the highlight results.
+
+### Pagination
+
+#### page
+
+- scope: `search`
+- type: `integer`
+- default: `0`
+
+Pagination parameter used to select the page to retrieve.
+<br>
+Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need to set `page=9`.
+
+### puts({'C#' => 'SetNbHitsPerPage', 'Java' => 'setHitsPerPage', 'Android' => 'setHitsPerPage'}, "hitsPerPage")
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `20`
+
+Pagination parameter used to select the number of hits per page. Defaults to 20.
+
+### Geo-Search
+
+
+
+#### aroundLatLng
+
+- scope: `search`
+- type: `string`
+
+Search for entries around a given latitude/longitude (specified as two floats separated by a comma).
+
+For example, `aroundLatLng=47.316669,5.016670`.
+
+- By default the maximum distance is automatically guessed based on the density of the area
+but you can specify it manually in meters with the **aroundRadius** parameter.
+The precision for ranking can be set with **aroundPrecision** parameter.
+- If you set aroundPrecision=100, the distances will be considered by ranges of 100m.
+- For example all distances 0 and 100m will be considered as identical for the "geo" ranking parameter.
+
+When **aroundRadius** is not set, the radius is computed automatically using the density of the area,
+you can retrieve the computed radius in the **automaticRadius** attribute of the answer,
+you can also use the **minimumAroundRadius** query parameter to specify a minimum radius in meters
+for the automatic computation of **aroundRadius**.
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+
+
+
+#### aroundLatLngViaIP
+
+- scope: `search`
+- type: `boolean`
+- default: `false`
+
+Search for entries around a given latitude/longitude automatically computed from user IP address.
+
+To enable it, use `aroundLatLngViaIP=true`.
+
+You can specify the maximum distance in meters with the `aroundRadius` parameter
+and the precision for ranking with `aroundPrecision`.
+
+For example:
+- if you set aroundPrecision=100,
+two objects that are in the range 0-99m
+will be considered as identical in the ranking for the "geo" ranking parameter (same for 100-199, 200-299, ... ranges).
+
+When indexing, you should specify the geo location of an object with the `_geoloc` attribute
+in the form `{"_geoloc":{"lat":48.853409, "lng":2.348800}}`.
+
+
+
+#### insideBoundingBox
+
+- scope: `search`
+- type: `boolean`
+- default: `false`
+
+Search entries inside a given area defined by the two extreme points of a rectangle
+(defined by 4 floats: p1Lat,p1Lng,p2Lat,p2Lng).
+For example:
+- `insideBoundingBox=47.3165,4.9665,47.3424,5.0201`
+
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+
+You can use several bounding boxes (OR) by passing more than 4 values.
+For example: instead of having 4 values you can pass 8 to search inside the UNION of two bounding boxes.
+
+#### insidePolygon
+
+Search entries inside a given area defined by a set of points
+(defined by a minimum of 6 floats: p1Lat,p1Lng,p2Lat,p2Lng,p3Lat,p3Long).
+
+For example:
+`InsidePolygon=47.3165,4.9665,47.3424,5.0201,47.32,4.98`).
+
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+### Highlighting / Snippeting
+
+#### attributesToHighlight
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+- default: `null`
+
+Default list of attributes to highlight.
+If set to null, all indexed attributes are highlighted.
+
+#### attributesToSnippet
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+- default: `null`
+
+Default list of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
+If set to null, no snippet is computed.
+
+
+#### highlightPreTag
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `<em>`
+
+Specify the string that is inserted before the highlighted parts in the query result (defaults to `<em>`).
+
+
+#### highlightPostTag
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `<em>`
+
+Specify the string that is inserted after the highlighted parts in the query result (defaults to `</em>`).
+
+### Filtering / Faceting
+
+#### numericFilters
+
+- scope: `search`
+- type: `array of strings`
+- default: `[]`
+
+A string that contains the comma separated list of numeric filters you want to apply.
+The filter syntax is `attributeName` followed by `operand` followed by `value`.
+Supported operands are `<`, `<=`, `=`, `>` and `>=`.
+
+You can easily perform range queries via the `:` operator.
+This is equivalent to combining a `>=` and `<=` operand.
+
+For example, `numericFilters=price:10 to 1000`.
+
+You can also mix OR and AND operators.
+The OR operator is defined with a parenthesis syntax.
+
+For example, `(code=1 AND (price:[0-100] OR price:[1000-2000]))`
+translates to `encodeURIComponent("code=1,(price:0 to 100,price:1000 to 2000)")`.
 
 You can also use a string array encoding (for example `numericFilters: ["price>100","price<1000"]`).
 
-#### Category Search Parameters
+#### tagFilters
 
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>tagFilters</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Filter the query by a set of tags. You can AND tags by separating them with commas. To OR tags, you must add parentheses. For example, <code>tagFilters=tag1,(tag2,tag3)</code> means <em>tag1 AND (tag2 OR tag3)</em>. You can also use a string array encoding. For example, <code>tagFilters: [&quot;tag1&quot;,[&quot;tag2&quot;,&quot;tag3&quot;]]</code> means <em>tag1 AND (tag2 OR tag3)</em>. Negations are supported via the <code>-</code> operator, prefixing the value. For example: <code>tagFilters=tag1,-tag2</code>.</p>
+- scope: `search`
+- type: `string`
+- default: `""`
 
-<p>At indexing, tags should be added in the <strong>_tags</strong> attribute of objects. For example <code>{&quot;_tags&quot;:[&quot;tag1&quot;,&quot;tag2&quot;]}</code>.</p>
+Filter the query by a set of tags.
 
-      </td>
-    </tr>
-    
-</tbody></table>
+You can AND tags by separating them with commas.
+To OR tags, you must add parentheses.
 
-#### Faceting Parameters
+For example, `tagFilters=tag1,(tag2,tag3)` means *tag1 AND (tag2 OR tag3)*.
 
-<table><tbody>
+You can also use a string array encoding.
 
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>facetFilters</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Filter the query with a list of facets. Facets are separated by commas and is encoded as <code>attributeName:value</code>. To OR facets, you must add parentheses. For example: <code>facetFilters=(category:Book,category:Movie),author:John%20Doe</code>. You can also use a string array encoding. For example, <code>[[&quot;category:Book&quot;,&quot;category:Movie&quot;],&quot;author:John%20Doe&quot;]</code>.</p>
+For example, `tagFilters: ["tag1",["tag2","tag3"]]` means *tag1 AND (tag2 OR tag3)*.
 
-      </td>
-    </tr>
-    
+Negations are supported via the `-` operator, prefixing the value.
 
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>facets</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of object attributes that you want to use for faceting. For each of the declared attributes, you&#39;ll be able to retrieve a list of the most relevant facet values, and their associated count for the current query.</p>
+For example: `tagFilters=tag1,-tag2`.
 
-<p>Attributes are separated by a comma. For example, <code>&quot;category,author&quot;</code>. You can also use JSON string array encoding. For example, <code>[&quot;category&quot;,&quot;author&quot;]</code>. Only the attributes that have been added in <strong>attributesForFaceting</strong> index setting can be used in this parameter. You can also use <code>*</code> to perform faceting on all attributes specified in <code>attributesForFaceting</code>. If the number of results is important, the count can be approximate, the attribute <code>exhaustiveFacetsCount</code> in the response is true when the count is exact.</p>
+At indexing, tags should be added in the **_tags** attribute of objects.
 
-      </td>
-    </tr>
-    
+For example `{"_tags":["tag1","tag2"]}`.
 
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>maxValuesPerFacet</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Limit the number of facet values returned for each facet. For example, <code>maxValuesPerFacet=10</code> will retrieve a maximum of 10 values per facet.</p>
 
-      </td>
-    </tr>
-    
+#### facetFilters
 
-</tbody></table>
+- scope: `search`
+- type: `string`
+- default: `""`
 
-#### Unified Filter Parameter (SQL - like)
+Filter the query with a list of facets. Facets are separated by commas and is encoded as `attributeName:value`.
+To OR facets, you must add parentheses.
 
-<table><tbody>
+For example: `facetFilters=(category:Book,category:Movie),author:John%20Doe`.
 
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>filters</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Filter the query with numeric, facet or/and tag filters. The syntax is a SQL like syntax, you can use the OR and AND keywords. The syntax for the underlying numeric, facet and tag filters is the same than in the other filters:
-<code>available=1 AND (category:Book OR NOT category:Ebook) AND _tags:public</code>
-<code>date: 1441745506 TO 1441755506 AND inStock &gt; 0 AND author:&quot;John Doe&quot;</code></p>
+You can also use a string array encoding.
 
-<p>If no attribute name is specified, the filter applies to <code>_tags</code>. For example: <code>public OR user_42</code> will translate to <code>_tags:public OR _tags:user_42</code>.</p>
+For example, `[["category:Book","category:Movie"],"author:John%20Doe"]`.
 
-<p>The list of keywords is:</p>
+#### 
 
-<ul>
-<li><code>OR</code>: create a disjunctive filter between two filters.</li>
-<li><code>AND</code>: create a conjunctive filter between two filters.</li>
-<li><code>TO</code>: used to specify a range for a numeric filter.</li>
-<li><code>NOT</code>: used to negate a filter. The syntax with the <code>-</code> isn’t allowed.</li>
-</ul>
+- scope: `search`
+- type: `string`
+- default: `""`
 
-      </td>
-    </tr>
-    
-</tbody></table>
+List of object attributes that you want to use for faceting.
+
+For each of the declared attributes, you'll be able to retrieve a list of the most relevant facet values,
+and their associated count for the current query.
+
+Attributes are separated by a comma.
+
+For example, `"category,author"`.
+
+You can also use JSON string array encoding.
+
+For example, `["category","author"]`.
+
+Only the attributes that have been added in **attributesForFaceting** index setting can be used in this parameter.
+You can also use `*` to perform faceting on all attributes specified in `attributesForFaceting`.
+If the number of results is important, the count can be approximate,
+the attribute `exhaustiveFacetsCount` in the response is true when the count is exact.
+
+#### maxValuesPerFacet
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `""`
+
+Limit the number of facet values returned for each facet.
+
+For example, `maxValuesPerFacet=10` will retrieve a maximum of 10 values per facet.
+
+####  -  SQL like filters
+
+Filter the query with numeric, facet or/and tag filters.
+
+The syntax is a SQL like syntax, you can use the OR and AND keywords.
+The syntax for the underlying numeric, facet and tag filters is the same than in the other filters:
+
+`available=1 AND (category:Book OR NOT category:Ebook) AND _tags:public`
+`date: 1441745506 TO 1441755506 AND inStock > 0 AND author:"John Doe"`
+
+If no attribute name is specified,
+the filter applies to `_tags`.
+
+For example: `public OR user_42` will translate to `_tags:public OR _tags:user_42`.
+
+The list of keywords is:
+* `OR`: create a disjunctive filter between two filters.
+* `AND`: create a conjunctive filter between two filters.
+* `TO`: used to specify a range for a numeric filter.
+* `NOT`: used to negate a filter. The syntax with the `-` isn’t allowed.
+
 *Note*: To specify a value with spaces or with a value equal to a keyword, it's possible to add quotes.
 
 **Warning:**
@@ -1410,680 +1254,111 @@ You can also use a string array encoding (for example `numericFilters: ["price>1
 * It's not possible to mix different categories of filters inside an OR like: num=3 OR tag1 OR facet:value
 * It's not possible to negate a group, it's only possible to negate a filter:  NOT(FILTER1 OR (FILTER2) is not allowed.
 
+### Advanced
 
-#### Distinct Parameter
-
-<table><tbody>
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>distinct</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to 1, enables the distinct feature, disabled by default, if the <code>attributeForDistinct</code> index setting is set. This feature is similar to the SQL &quot;distinct&quot; keyword. When enabled in a query with the <code>distinct=1</code> parameter, all hits containing a duplicate value for the attributeForDistinct attribute are removed from results. For example, if the chosen attribute is <code>show_name</code> and several hits have the same value for <code>show_name</code>, then only the best one is kept and the others are removed.</p>
-
-      </td>
-    </tr>
-    
-
-</tbody></table>
-
-To get a full understanding of how `Distinct` works, you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
-
-### Indexing parameters
-
-<table><tbody>
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToIndex</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The list of attributes you want index (i.e. to make searchable).</p>
-
-<p>If set to null, all textual and numerical attributes of your objects are indexed. Make sure you updated this setting to get optimal results.</p>
-
-<p>This parameter has two important uses:</p>
-
-<ul>
-<li><em>Limit the attributes to index</em>.<br/>For example, if you store the URL of a picture, you want to store it and be able to retrieve it, but you probably don&#39;t want to search in the URL.</li>
-<li><em>Control part of the ranking</em>.<br/> Matches in attributes at the beginning of the list will be considered more important than matches in attributes further down the list. In one attribute, matching text at the beginning of the attribute will be considered more important than text after. You can disable this behavior if you add your attribute inside <code>unordered(AttributeName)</code>. For example, <code>attributesToIndex: [&quot;title&quot;, &quot;unordered(text)&quot;]</code>.
-You can decide to have the same priority for two attributes by passing them in the same string using a comma as a separator. For example <code>title</code> and <code>alternative_title</code> have the same priority in this example, which is different than text priority: <code>attributesToIndex:[&quot;title,alternative_title&quot;, &quot;text&quot;]</code>.
-To get a full description of how the Ranking works, you can have a look at our <a href="https://www.algolia.com/doc/relevance/ranking">Ranking guide</a>.</li>
-<li><strong>numericAttributesToIndex</strong>: (array of strings) All numerical attributes are automatically indexed as numerical filters (allowing filtering operations like <code>&lt;</code> and <code>&lt;=</code>). If you don&#39;t need filtering on some of your numerical attributes, you can specify this list to speed up the indexing.<br/> If you only need to filter on a numeric value with the operator &#39;=&#39;, you can speed up the indexing by specifying the attribute with <code>equalOnly(AttributeName)</code>. The other operators will be disabled.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesForFaceting</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The list of fields you want to use for faceting. All strings in the attribute selected for faceting are extracted and added as a facet. If set to null, no attribute is used for faceting.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributeForDistinct</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The name of the attribute used for the <code>Distinct</code> feature. This feature is similar to the SQL &quot;distinct&quot; keyword. When enabled in queries with the <code>distinct=1</code> parameter, all hits containing a duplicate value for this attribute are removed from the results. For example, if the chosen attribute is <code>show_name</code> and several hits have the same value for <code>show_name</code>, then only the first one is kept and the others are removed from the results. To get a full understanding of how <code>Distinct</code> works, you can have a look at our <a href="https://www.algolia.com/doc/search/distinct">guide on distinct</a>.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>ranking</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Controls the way results are sorted.</p>
-
-<p>We have nine available criteria:</p>
-
-<ul>
-<li><code>typo</code>: Sort according to number of typos.</li>
-<li><code>geo</code>: Sort according to decreasing distance when performing a geo location based search.</li>
-<li><code>words</code>: Sort according to the number of query words matched by decreasing order. This parameter is useful when you use the <code>optionalWords</code> query parameter to have results with the most matched words first.</li>
-<li><code>proximity</code>: Sort according to the proximity of the query words in hits.</li>
-<li><code>attribute</code>: Sort according to the order of attributes defined by attributesToIndex.</li>
-<li><code>exact</code>:
-
-<ul>
-<li>If the user query contains one word: sort objects having an attribute that is exactly the query word before others. For example, if you search for the TV show &quot;V&quot;, you want to find it with the &quot;V&quot; query and avoid getting all popular TV shows starting by the letter V before it.</li>
-<li>If the user query contains multiple words: sort according to the number of words that matched exactly (not as a prefix).</li>
-</ul></li>
-<li><code>custom</code>: Sort according to a user defined formula set in the <code>customRanking</code> attribute.</li>
-<li><code>asc(attributeName)</code>: Sort according to a numeric attribute using ascending order. <code>attributeName</code> can be the name of any numeric attribute in your records (integer, double or boolean).</li>
-<li><code>desc(attributeName)</code>: Sort according to a numeric attribute using descending order. <code>attributeName</code> can be the name of any numeric attribute in your records (integer, double or boolean). <br/>The standard order is <code>[&quot;typo&quot;, &quot;geo&quot;, &quot;words&quot;, &quot;proximity&quot;, &quot;attribute&quot;, &quot;exact&quot;, &quot;custom&quot;]</code>.
-To get a full description of how the Ranking works, you can have a look at our <a href="https://www.algolia.com/doc/relevance/ranking">Ranking guide</a>.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>customRanking</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Lets you specify part of the ranking.</p>
-
-<p>The syntax of this condition is an array of strings containing attributes prefixed by the asc (ascending order) or desc (descending order) operator. For example, <code>&quot;customRanking&quot; =&gt; [&quot;desc(population)&quot;, &quot;asc(name)&quot;]</code>.</p>
-
-<p>To get a full description of how the Custom Ranking works, you can have a look at our <a href="https://www.algolia.com/doc/relevance/ranking">Ranking guide</a>.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>queryType</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>prefixLast</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Select how the query words are interpreted. It can be one of the following values:</p>
-
-<ul>
-<li><code>prefixAll</code>: All query words are interpreted as prefixes.</li>
-<li><code>prefixLast</code>: Only the last word is interpreted as a prefix (default behavior).</li>
-<li><code>prefixNone</code>: No query word is interpreted as a prefix. This option is not recommended.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>separatorsToIndex</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>empty</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the separators (punctuation characters) to index. By default, separators are not indexed. Use <code>+#</code> to be able to search Google+ or C#.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>slaves</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The list of indices on which you want to replicate all write operations. In order to get response times in milliseconds, we pre-compute part of the ranking during indexing. If you want to use different ranking configurations depending of the use case, you need to create one index per ranking configuration. This option enables you to perform write operations only on this index and automatically update slave indices with the same operations.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>unretrievableAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>empty</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The list of attributes that cannot be retrieved at query time. This feature allows you to have attributes that are used for indexing and/or ranking but cannot be retrieved. Defaults to null. Warning: for testing purposes, this setting is ignored when you&#39;re using the ADMIN API Key.</p>
-
-      </td>
-    </tr>
-    
-
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>allowCompressionOfIntegerArray</code></div>
-            <div class="client-readme-param-meta"><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Allows compression of big integer arrays. In data-intensive use-cases, we recommended enabling this feature and then storing the list of user IDs or rights as an integer array. When enabled, the integer array is reordered to reach a better compression ratio. Defaults to false.</p>
-
-      </td>
-    </tr>
-    
-
-</tbody></table>
-
-### Query expansion
-
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>synonyms</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of array of string considered as equals</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>For example, you may want to retrieve the <strong>black ipad</strong> record when your users are searching for <strong>dark ipad</strong>, even if the word <strong>dark</strong> is not part of the record. To do this, you need to configure <strong>black</strong> as a synonym of <strong>dark</strong>. For example, <code>&quot;synomyms&quot;: [ [ &quot;black&quot;, &quot;dark&quot; ], [ &quot;small&quot;, &quot;little&quot;, &quot;mini&quot; ], ... ]</code>. The Synonym feature also supports multi-words expressions like <code>&quot;synonyms&quot;: [ [&quot;NYC&quot;, &quot;New York City&quot;] ]</code></p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>placeholders</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>hash of array of words</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>This is an advanced use-case to define a token substitutable by a list of words without having the original token searchable. It is defined by a hash associating placeholders to lists of substitutable words. For example, <code>&quot;placeholders&quot;: { &quot;&lt;streetnumber&gt;&quot;: [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, ..., &quot;9999&quot;]}</code> would allow it to be able to match all street numbers. We use the <code>&lt; &gt;</code> tag syntax to define placeholders in an attribute. For example:</p>
-
-<ul>
-<li>Push a record with the placeholder: <code>{ &quot;name&quot; : &quot;Apple Store&quot;, &quot;address&quot; : &quot;&amp;lt;streetnumber&amp;gt; Opera street, Paris&quot; }</code>.</li>
-<li>Configure the placeholder in your index settings: <code>&quot;placeholders&quot;: { &quot;&lt;streetnumber&gt;&quot; : [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, ... ], ... }</code>.</li>
-</ul>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>disableTypoToleranceOnWords</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string array</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify a list of words on which automatic typo tolerance will be disabled.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>disableTypoToleranceOnAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string array</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of attributes on which you want to disable typo tolerance (must be a subset of the <code>attributesToIndex</code> index setting). By default the list is empty.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>disablePrefixOnAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string array</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of attributes on which you want to disable prefix matching (must be a subset of the <code>attributesToIndex</code> index setting). This setting is useful on attributes that contain string that should not be matched as a prefix (for example a product SKU). By default the list is empty.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>disableExactOnAttributes</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string array</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>List of attributes on which you want to disable the computation of <code>exact</code> criteria (must be a subset of the <code>attributesToIndex</code> index setting). By default the list is empty.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>altCorrections</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>object array</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify alternative corrections that you want to consider. Each alternative correction is described by an object containing three attributes:</p>
-
-<ul>
-<li><strong>word</strong>: The word to correct.</li>
-<li><strong>correction</strong>: The corrected word.</li>
-<li><strong>nbTypos</strong> The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).</li>
-</ul>
-
-<p>For example <code>&quot;altCorrections&quot;: [ { &quot;word&quot; : &quot;foot&quot;, &quot;correction&quot;: &quot;feet&quot;, &quot;nbTypos&quot;: 1 }, { &quot;word&quot;: &quot;feet&quot;, &quot;correction&quot;: &quot;foot&quot;, &quot;nbTypos&quot;: 1 } ]</code>.</p>
-
-      </td>
-    </tr>
-    
-
-</tbody></table>
-
-### Default query parameters (can be overwritten by queries)
-
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>minWordSizefor1Typo</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div><div><em>Default: <strong>4</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The minimum number of characters needed to accept one typo (default = 4).</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>minWordSizefor2Typos</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div><div><em>Default: <strong>8</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The minimum number of characters needed to accept two typos (default = 8).</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>hitsPerPage</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div><div><em>Default: <strong>10</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>The number of hits per page (default = 10).</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToRetrieve</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Default list of attributes to retrieve in objects. If set to null, all attributes are retrieved.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToHighlight</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Default list of attributes to highlight. If set to null, all indexed attributes are highlighted.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>attributesToSnippet</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Default list of attributes to snippet alongside the number of words to return (syntax is <code>attributeName:nbWords</code>).<br/>By default, no snippet is computed. If set to null, no snippet is computed.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>highlightPreTag</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the string that is inserted before the highlighted parts in the query result (defaults to <code>&lt;em&gt;</code>).</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>highlightPostTag</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the string that is inserted after the highlighted parts in the query result (defaults to <code>&lt;/em&gt;</code>).</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>optionalWords</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>array of strings</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify a list of words that should be considered optional when found in the query.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>allowTyposOnNumericTokens</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>boolean</strong></em></div><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, disable typo-tolerance on numeric tokens (=numbers) in the query word. For example the query <code>&quot;304&quot;</code> will match with <code>&quot;30450&quot;</code>, but not with <code>&quot;40450&quot;</code> that would have been the case with typo-tolerance enabled. Can be very useful on serial numbers and zip codes searches. Defaults to false.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>ignorePlurals</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>boolean</strong></em></div><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to true, singular/plural forms won’t be considered as typos (for example car/cars and foot/feet will be considered as equivalent). Defaults to false.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>advancedSyntax</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer (0 or 1)</strong></em></div><div><em>Default: <strong>0</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Enable the advanced query syntax. Defaults to 0 (false).</p>
-
-<ul>
-<li><p><strong>Phrase query:</strong> a phrase query defines a particular sequence of terms. A phrase query is build by Algolia&#39;s query parser for words surrounded by <code>&quot;</code>. For example, <code>&quot;search engine&quot;</code> will retrieve records having <code>search</code> next to <code>engine</code> only. Typo-tolerance is disabled on phrase queries.</p></li>
-<li><p><strong>Prohibit operator:</strong> The prohibit operator excludes records that contain the term after the <code>-</code> symbol. For example <code>search -engine</code> will retrieve records containing <code>search</code> but not <code>engine</code>.</p></li>
-</ul>
-
-      </td>
-    </tr>
-    
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>replaceSynonymsInHighlight</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>boolean</strong></em></div><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>If set to false, words matched via synonyms expansion will not be replaced by the matched synonym in the highlighted result. Defaults to true.</p>
-
-      </td>
-    </tr>
-    
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>maxValuesPerFacet</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Limit the number of facet values returned for each facet. For example: <code>maxValuesPerFacet=10</code> will retrieve max 10 values per facet.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>distinct</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>integer (0 or 1)</strong></em></div><div><em>Default: <strong>0</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Enable the distinct feature (disabled by default) if the <code>attributeForDistinct</code> index setting is set. This feature is similar to the SQL &quot;distinct&quot; keyword: when enabled in a query with the <code>distinct=1</code> parameter, all hits containing a duplicate value for the<code>attributeForDistinct</code> attribute are removed from results. For example, if the chosen attribute is <code>show_name</code> and several hits have the same value for <code>show_name</code>, then only the best one is kept and others are removed.</p>
-
-<p>To get a full understanding of how <code>Distinct</code> works, you can have a look at our <a href="https://www.algolia.com/doc/search/distinct">guide on distinct</a>.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>typoTolerance</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>string</strong></em></div><div><em>Default: <strong>true</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>This setting has four different options:</p>
-
-<ul>
-<li><p><code>true:</code> activate the typo-tolerance (default value).</p></li>
-<li><p><code>false:</code> disable the typo-tolerance</p></li>
-<li><p><code>min:</code> keep only results with the lowest number of typos. For example if one result matches without typos, then all results with typos will be hidden.</p></li>
-<li><p><code>strict:</code> if there is a match without typo, then all results with 2 typos or more will be removed.</p></li>
-</ul>
-
-      </td>
-    </tr>
-    
-    
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>removeStopWords</code></div>
-            <div class="client-readme-param-meta"><div><em>Type: <strong>boolean</strong></em></div><div><em>Default: <strong>false</strong></em></div></div>
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Remove stop words from query before executing it. Defaults to false. Contains stop words for 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu)</p>
-
-      </td>
-    </tr>
-    
-  </tbody></table>
+#### 
 
+- scope: `search`
+- type: `boolean`
+- default: `false`
 
+If set to true,
+the result hits will contain ranking information in the **_rankingInfo** attribute.
 
+#### 
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `false`
+
+If set to 1,
+enables the distinct feature, disabled by default, if the `attributeForDistinct` index setting is set.
+
+This feature is similar to the SQL "distinct" keyword.
+When enabled in a query with the `distinct=1` parameter,
+all hits containing a duplicate value for the attributeForDistinct attribute are removed from results.
+
+For example, if the chosen attribute is `show_name` and several hits have the same value for `show_name`,
+then only the best one is kept and the others are removed.
+
+To get a full understanding of how `Distinct` works,
+you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
+
+#### attributeForDistinct
+
+- scope: `indexing`
+- type: `string`
+
+The name of the attribute used for the `Distinct` feature.
+
+This feature is similar to the SQL "distinct" keyword.
+When enabled in queries with the `distinct=1` parameter,
+all hits containing a duplicate value for this attribute are removed from the results.
+
+For example, if the chosen attribute is `show_name` and several hits have the same value for `show_name`,
+then only the first one is kept and the others are removed from the results.
+
+To get a full understanding of how `Distinct` works,
+you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
+
+#### 
+
+- scope: `indexing`
+- type: `boolean`
+- default: `true`
+
+If set to false, this query will not be taken into account in the analytics feature.
+
+#### separatorsToIndex
+
+- scope: `indexing`
+- type: `string`
+- default: `empty`
+
+Specify the separators (punctuation characters) to index.
+
+By default, separators are not indexed.
+
+Use `+#` to be able to search Google+ or C#.
+
+#### allowCompressionOfIntegerArray
+
+- scope: `indexing`
+- type: `boolean`
+- default: `false`
+
+Allows compression of big integer arrays.
+
+In data-intensive use-cases,
+we recommended enabling this feature and then storing the list of user IDs or rights as an integer array.
+When enabled, the integer array is reordered to reach a better compression ratio.
+
+
+#### placeholders
+
+- scope: `indexing`
+- type: `hash of array of words`
+
+This is an advanced use-case to define a token substitutable by a list of words
+without having the original token searchable.
+
+It is defined by a hash associating placeholders to lists of substitutable words.
+
+For example, `"placeholders": { "<streetnumber>": ["1", "2", "3", ..., "9999"]}`
+would allow it to be able to match all street numbers. We use the `< >` tag syntax
+to define placeholders in an attribute.
+
+For example:
+* Push a record with the placeholder:
+`{ "name" : "Apple Store", "address" : "&lt;streetnumber&gt; Opera street, Paris" }`.
+* Configure the placeholder in your index settings:
+`"placeholders": { "<streetnumber>" : ["1", "2", "3", "4", "5", ... ], ... }`.
 
 ## Manage Indices
 
-### List indices - `listIndices`
+### List indices - `listIndexes`
 
-You can list all your indices along with their associated information (number of entries, disk size, etc.) with the `listIndexes` method:
+You can list all your indices along with their associated information (number of entries, disk size, etc.)
 
 ```php
 var_dump($client->listIndexes());
@@ -2094,8 +1369,7 @@ var_dump($client->listIndexes());
 
 
 
-
-### Delete index - `deleteIndex`
+### Delete index - `deleteIndex` `deleteIndex`
 
 You can delete an index using its name:
 
@@ -2235,6 +1509,17 @@ $res = $client->getLogs();
 // Get last 100 log entries
 $res = $client->getLogs(0, 100);
 ```
+
+browse`
+
+The `search` method cannot return more than 1,000 results. If you need to
+retrieve all the content of your index (for backup, SEO purposes or for running
+a script on it), you should use the `browse` method instead. This method lets
+you retrieve objects beyond the 1,000 limit.
+
+This method is optimized for speed. To make it fast, distinct, typo-tolerance,
+word proximity, geo distance and number of matched words are disabled. Results
+are still returned ranked by attributes and custom ranking.
 
 
 It will return a `cursor` alongside your data, that you can then use to retrieve
@@ -2539,4 +1824,6 @@ $res = $client->getUserKeyACL('f420238212c54dcfad07ea0aa6d5c45f');
 // Gets the rights of an index specific key
 $res = $index->getUserKeyACL('71671c38001bf3ac857bc82052485107');
 ```
+
+
 
