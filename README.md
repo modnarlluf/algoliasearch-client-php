@@ -641,11 +641,13 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ### All Parameters
 
+<div class="warning">
 **`i`**: The setting can only be used in the `setSettings` method
 <br>
 **`s`**: The setting can only be used in the `search` method
 <br>
 **`i`** **`s`**: The setting can be used in the `setSettings` method and be overriden in the`search` method
+</div>
 
 **Query**
 - query `s`
