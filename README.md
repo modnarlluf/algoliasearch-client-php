@@ -712,20 +712,9 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 #### query
 
-<table><tbody>
-<tr>
-    <td>scope</td>
-    <td>`search`</td>
-</tr>
-<tr>
-    <td>type</td>
-    <td>`string`</td>
-</tr>
-<tr>
-    <td>default</td>
-    <td>`""`</td>
-</tr>
-<tbody><table>
+- scope: `search`
+- type: `string`
+- default: `""`
 
 The instant search query string, used to set the string you want to search in your index. If no query parameter is set, the textual search will match with all the objects.
 
