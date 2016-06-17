@@ -641,72 +641,79 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ### All Parameters
 
+**`i`**: The setting can only be used in the `setSettings` method
+<br>
+**`s`**: The setting can only be used in the `search` method
+<br>
+**`i`** **`s`**: The setting can be used in the `setSettings` method and be overriden in the`search` method
+
 **Query**
-- query
+- query `s`
 
 **Query Strategy**
-- queryType
-- removeWordsIfNoResults
-- advancedSyntax
-- optionalWords
-- removeStopWords
+- queryType `i` `s`
+- removeWordsIfNoResults `i` `s`
+- advancedSyntax `i` `s`
+- optionalWords `i` `s`
+- removeStopWords `i` `s`
 
 **Attributes**
-- attributesToIndex
-- numericAttributesToIndex
-- attributesForFaceting
-- unretrievableAttributes
-- restrictSearchableAttributes
-- attributesToRetrieve
+- attributesToIndex `i`
+- numericAttributesToIndex `i`
+- attributesForFaceting `i`
+- unretrievableAttributes `i`
+- restrictSearchableAttributes `s`
+- attributesToRetrieve `i`
 
 **Ranking**
-- ranking
-- customRanking
-- slaves
-
-**Typos**
-- minWordSizefor1Typo
-- minWordSizefor2Typos
-- typoTolerance
-- allowTyposOnNumericTokens
-- ignorePlural
-- disableTypoToleranceOnAttributes
-- altCorrections
-- disablePrefixOnAttributes
-- disableExactOnAttributes
-
-**Synonyms**
-- synonyms
-- replaceSynonymsInHighlight
-
-**Pagination**
-- page
-- hitsPerPage
-
-**Geo-Search**
-- aroundLatLng
-- aroundLatLngViaIP
-- insideBoundingBox
-- insidePolygon
-
-**Highlighting / Snippeting**
-- attributesToHighlight
-- attributesToSnippet
-- highlightPreTag
-- highlightPostTag
+- ranking `i`
+- customRanking `i`
+- slaves `i`
 
 **Filtering / Faceting**
-- numericFilters
-- tagFilters
-- facetFilters
-- maxValuesPerFacet
-- SQL like filters
+- numericFilters `s`
+- tagFilters `s`
+- facetFilters `s`
+- maxValuesPerFacet `i` `s`
+- SQL like filters `s`
+
+**Highlighting / Snippeting**
+- attributesToHighlight `i` `s`
+- attributesToSnippet `i` `s`
+- highlightPreTag `i` `s`
+- highlightPostTag `i` `s`
+
+**Pagination**
+- page `s`
+- hitsPerPage `i` `s`
+
+**Synonyms**
+- synonyms `s`
+- replaceSynonymsInHighlight `i` `s`
+
+**Typos**
+- minWordSizefor1Typo `i` `s`
+- minWordSizefor2Typos `i` `s`
+- typoTolerance `i` `s`
+- allowTyposOnNumericTokens `i` `s`
+- ignorePlural `i` `s`
+- disableTypoToleranceOnAttributes `i` `s`
+- altCorrections `i`
+- disablePrefixOnAttributes `i`
+- disableExactOnAttributes `i`
+
+**Geo-Search**
+- aroundLatLng `s`
+- aroundLatLngViaIP `s`
+- insideBoundingBox `s`
+- insidePolygon `s`
 
 **Advanced**
-- attributeForDistinct
-- separatorsToIndex
-- allowCompressionOfIntegerArray
-- placeholders
+- getRankingInfo `s`
+- attributeForDistinct `i`
+- separatorsToIndex `i`
+- allowCompressionOfIntegerArray `i`
+- placeholders `i`
 
 ### Query
 
