@@ -989,7 +989,7 @@ Pagination parameter used to select the page to retrieve.
 <br>
 Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need to set `page=9`.
 
-### hitsPerPage
+#### hitsPerPage
 
 - scope: `indexing`, `search`
 - type: `integer`
