@@ -641,17 +641,17 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ### All Parameters
 
-#### Query
+**Query**
 - query
 
-#### Query Strategy
+**Query Strategy**
 - queryType
 - removeWordsIfNoResults
 - advancedSyntax
 - optionalWords
 - removeStopWords
 
-#### Attributes
+**Attributes**
 - attributesToIndex
 - numericAttributesToIndex
 - attributesForFaceting
@@ -659,12 +659,12 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - restrictSearchableAttributes
 - attributesToRetrieve
 
-#### Ranking
+**Ranking**
 - ranking
 - customRanking
 - slaves
 
-#### Typos
+**Typos**
 - minWordSizefor1Typo
 - minWordSizefor2Typos
 - typoTolerance
@@ -675,34 +675,34 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - disablePrefixOnAttributes
 - disableExactOnAttributes
 
-#### Synonyms
+**Synonyms**
 - synonyms
 - replaceSynonymsInHighlight
 
-#### Pagination
+**Pagination**
 - page
 - hitsPerPage
 
-#### Geo-Search
+**Geo-Search**
 - aroundLatLng
 - aroundLatLngViaIP
 - insideBoundingBox
 - insidePolygon
 
-#### Highlighting / Snippeting
+**Highlighting / Snippeting**
 - attributesToHighlight
 - attributesToSnippet
 - highlightPreTag
 - highlightPostTag
 
-#### Filtering / Faceting
+**Filtering / Faceting**
 - numericFilters
 - tagFilters
 - facetFilters
 - maxValuesPerFacet
 - SQL like filters
 
-#### Advanced
+**Advanced**
 - attributeForDistinct
 - separatorsToIndex
 - allowCompressionOfIntegerArray
