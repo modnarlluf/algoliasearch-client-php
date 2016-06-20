@@ -641,23 +641,15 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ### All Parameters
 
-<div class="warning">
-**`i`**: The setting can only be used in the `setSettings` method
+`i`: The setting can only be used in the `setSettings` method
 <br>
-**`s`**: The setting can only be used in the `search` method
+`s`: The setting can only be used in the `search` method
 <br>
-**`i`** **`s`**: The setting can be used in the `setSettings` method and be overriden in the`search` method
-</div>
+`i` `s`: The setting can be used in the `setSettings` method and be overriden in the`search` method
+
 
 **Query**
 - query `s`
-
-**Query Strategy**
-- queryType `i` `s`
-- removeWordsIfNoResults `i` `s`
-- advancedSyntax `i` `s`
-- optionalWords `i` `s`
-- removeStopWords `i` `s`
 
 **Attributes**
 - attributesToIndex `i`
@@ -710,6 +702,13 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - insideBoundingBox `s`
 - insidePolygon `s`
 
+**Query Strategy**
+- queryType `i` `s`
+- removeWordsIfNoResults `i` `s`
+- advancedSyntax `i` `s`
+- optionalWords `i` `s`
+- removeStopWords `i` `s`
+
 **Advanced**
 - getRankingInfo `s`
 - attributeForDistinct `i`
@@ -727,71 +726,6 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 The instant search query string, used to set the string you want to search in your index. If no query parameter is set, the textual search will match with all the objects.
 
-### Query Strategy
-
-#### queryType
-
-- scope: `indexing`, `search`
-- default: `prefixLast`
-
-Selects how the query words are interpreted. It can be one of the following values:
-* `prefixAll`:
-All query words are interpreted as prefixes. This option is not recommended.
-* `prefixLast`:
-Only the last word is interpreted as a prefix (default behavior).
-* `prefixNone`:
-No query word is interpreted as a prefix. This option is not recommended.
-
-#### removeWordsIfNoResults
-
-- scope: `indexing`, `search`
-- type: `string`
-- default: `none`
-
-This option is used to select a strategy in order to avoid having an empty result page.
-There are four different options:
-- `lastWords`:
-When a query does not return any results, the last word will be added as optional.
-The process is repeated with n-1 word, n-2 word, ... until there are results.
-- `firstWords`:
-When a query does not return any results, the first word will be added as optional.
-The process is repeated with second word, third word, ... until there are results.
-- `allOptional`:
-When a query does not return any results, a second trial will be made with all words as optional.
-This is equivalent to transforming the AND operand between query terms to an OR operand.
-- `none`:
-No specific processing is done when a query does not return any results (default behavior).
-
-
-#### advancedSyntax
-
-- scope: `indexing`, `search`
-- default: `0 (false)`
-
-Enables the advanced query syntax.
-
-This syntax allow to do two things:
-* **Phrase query**: A phrase query defines a particular sequence of terms. A phrase query is built by Algolia's query parser for words surrounded by `"`. For example, `"search engine"` will retrieve records having `search` next to `engine` only. Typo tolerance is _disabled_ on phrase queries.
-* **Prohibit operator**: The prohibit operator excludes records that contain the term after the `-` symbol. For example, `search -engine` will retrieve records containing `search` but not `engine`.
-
-
-#### optionalWords
-
-- scope: `indexing`, `search`
-- default: `[]`
-
-A string that contains the comma separated list of words that should be considered as optional when found in the query.
-
-
-
-#### removeStopWords
-
-- scope: `indexing`, `search`
-- default: `false`
-
-Remove the stop words from query before executing it.
-Defaults to false. Contains a list of stop words from 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu).
-In most use-cases, **we don't recommend enabling this option**.
 
 ### Attributes
 
@@ -935,274 +869,6 @@ you need to create one index per ranking configuration.
 This option enables you to perform write operations only on this index and automatically
 update slave indices with the same operations.
 
-### Typos
-
-#### minWordSizefor1Typo
-
-- scope: `indexing`, `search`
-- type: `integer`
-- default: `4`
-
-The minimum number of characters needed to accept one typo.
-
-#### minWordSizefor2Typos
-
-- scope: `indexing`, `search`
-- type: `integer`
-- default: `8`
-
-The minimum number of characters needed to accept two typos.
-
-
-#### typoTolerance
-
-- scope: `indexing`, `search`
-- type: `boolean`
-- default: `true`
-
-This option allows you to control the number of typos allowed in the result set:
-
-* `true`: The typo tolerance is enabled and all matching hits are retrieved (default behavior).
-* `false`: The typo tolerance is disabled. All results with typos will be hidden.
-* `min`: Only keep results with the minimum number of typos. For example, if one result matches without typos, then all results with typos will be hidden.
-* `strict`: Hits matching with 2 typos are not retrieved if there are some matching without typos.
-
-
-#### allowTyposOnNumericTokens
-
-- scope: `indexing`, `search`
-- type: `boolean`
-- default: `true`
-
-If set to false, disables typo tolerance on numeric tokens (numbers).
-
-#### ignorePlural
-
-- scope: `indexing`, `search`
-- type: `boolean`
-- default: `false`
-
-If set to true, plural won't be considered as a typo. For example, car and cars, or foot and feet will be considered as equivalent. Defaults to false.
-
-#### disableTypoToleranceOnAttributes
-
-- scope: `indexing`, `search`
-- type: `string`
-- default: ``
-
-List of attributes on which you want to disable typo tolerance
-(must be a subset of the `attributesToIndex` index setting).
-
-Attributes are separated with a comma such as `"name,address"`.
-You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
-
-#### altCorrections
-
-- scope: `indexing`
-- type: `array of objects`
-- defaults: `[]`
-
-Specify alternative corrections that you want to consider.
-
-Each alternative correction is described by an object containing three attributes:
-* **word**: The word to correct.
-* **correction**: The corrected word.
-* **nbTypos** The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).
-
-For example:
-
-`"altCorrections": [ { "word" : "foot", "correction": "feet", "nbTypos": 1 }, { "word": "feet", "correction": "foot", "nbTypos": 1 } ]`.
-
-
-#### disablePrefixOnAttributes
-
-- scope: `indexing`
-- type: `string array`
-- default: `[]`
-
-List of attributes on which you want to disable prefix matching
-(must be a subset of the `attributesToIndex` index setting).
-
-This setting is useful on attributes that contain string that should not be matched as a prefix
-(for example a product SKU).
-
-
-#### disableExactOnAttributes
-
-- scope: `indexing`
-- type: `string array`
-- default: `[]`
-
-List of attributes on which you want to disable the computation of `exact` criteria
-(must be a subset of the `attributesToIndex` index setting).
-
-### Synonyms
-
-#### synonyms
-
-- scope: `search`
-- type: `boolean`
-- default: `true`
-
-If set to false, this query will not use synonyms defined in the configuration.
-
-#### replaceSynonymsInHighlight
-
-- scope: `indexing`, `search`
-- type: `boolean`
-- default: true
-
-If set to false, words matched via synonym expansion will not be replaced by the matched synonym
-in the highlight results.
-
-### Pagination
-
-#### page
-
-- scope: `search`
-- type: `integer`
-- default: `0`
-
-Pagination parameter used to select the page to retrieve.
-<br>
-Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need to set `page=9`.
-
-#### hitsPerPage
-
-- scope: `indexing`, `search`
-- type: `integer`
-- default: `20`
-
-Pagination parameter used to select the number of hits per page. Defaults to 20.
-
-### Geo-Search
-
-
-
-#### aroundLatLng
-
-- scope: `search`
-- type: `string`
-
-Search for entries around a given latitude/longitude (specified as two floats separated by a comma).
-
-For example, `aroundLatLng=47.316669,5.016670`.
-
-- By default the maximum distance is automatically guessed based on the density of the area
-but you can specify it manually in meters with the **aroundRadius** parameter.
-The precision for ranking can be set with **aroundPrecision** parameter.
-- If you set aroundPrecision=100, the distances will be considered by ranges of 100m.
-- For example all distances 0 and 100m will be considered as identical for the "geo" ranking parameter.
-
-When **aroundRadius** is not set, the radius is computed automatically using the density of the area,
-you can retrieve the computed radius in the **automaticRadius** attribute of the answer,
-you can also use the **minimumAroundRadius** query parameter to specify a minimum radius in meters
-for the automatic computation of **aroundRadius**.
-
-At indexing, you should specify geoloc of an object with the _geoloc attribute
-(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
-or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
-if you have several geo-locations in your record).
-
-
-
-
-#### aroundLatLngViaIP
-
-- scope: `search`
-- type: `boolean`
-- default: `false`
-
-Search for entries around a given latitude/longitude automatically computed from user IP address.
-
-To enable it, use `aroundLatLngViaIP=true`.
-
-You can specify the maximum distance in meters with the `aroundRadius` parameter
-and the precision for ranking with `aroundPrecision`.
-
-For example:
-- if you set aroundPrecision=100,
-two objects that are in the range 0-99m
-will be considered as identical in the ranking for the "geo" ranking parameter (same for 100-199, 200-299, ... ranges).
-
-When indexing, you should specify the geo location of an object with the `_geoloc` attribute
-in the form `{"_geoloc":{"lat":48.853409, "lng":2.348800}}`.
-
-
-
-#### insideBoundingBox
-
-- scope: `search`
-- type: `boolean`
-- default: `false`
-
-Search entries inside a given area defined by the two extreme points of a rectangle
-(defined by 4 floats: p1Lat,p1Lng,p2Lat,p2Lng).
-For example:
-- `insideBoundingBox=47.3165,4.9665,47.3424,5.0201`
-
-
-At indexing, you should specify geoloc of an object with the _geoloc attribute
-(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
-or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
-if you have several geo-locations in your record).
-
-
-You can use several bounding boxes (OR) by passing more than 4 values.
-For example: instead of having 4 values you can pass 8 to search inside the UNION of two bounding boxes.
-
-#### insidePolygon
-
-Search entries inside a given area defined by a set of points
-(defined by a minimum of 6 floats: p1Lat,p1Lng,p2Lat,p2Lng,p3Lat,p3Long).
-
-For example:
-`InsidePolygon=47.3165,4.9665,47.3424,5.0201,47.32,4.98`).
-
-
-At indexing, you should specify geoloc of an object with the _geoloc attribute
-(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
-or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
-if you have several geo-locations in your record).
-
-### Highlighting / Snippeting
-
-#### attributesToHighlight
-
-- scope: `indexing`, `search`
-- type: `array of strings`
-- default: `null`
-
-Default list of attributes to highlight.
-If set to null, all indexed attributes are highlighted.
-
-#### attributesToSnippet
-
-- scope: `indexing`, `search`
-- type: `array of strings`
-- default: `null`
-
-Default list of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
-If set to null, no snippet is computed.
-
-
-#### highlightPreTag
-
-- scope: `indexing`, `search`
-- type: `string`
-- default: `<em>`
-
-Specify the string that is inserted before the highlighted parts in the query result (defaults to `<em>`).
-
-
-#### highlightPostTag
-
-- scope: `indexing`, `search`
-- type: `string`
-- default: `<em>`
-
-Specify the string that is inserted after the highlighted parts in the query result (defaults to `</em>`).
-
 ### Filtering / Faceting
 
 #### numericFilters
@@ -1331,6 +997,346 @@ The list of keywords is:
 * Like for the other filters (for performance reasons), it's not possible to have FILTER1 OR (FILTER2 AND FILTER3).
 * It's not possible to mix different categories of filters inside an OR like: num=3 OR tag1 OR facet:value
 * It's not possible to negate a group, it's only possible to negate a filter:  NOT(FILTER1 OR (FILTER2) is not allowed.
+
+
+### Highlighting / Snippeting
+
+#### attributesToHighlight
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+- default: `null`
+
+Default list of attributes to highlight.
+If set to null, all indexed attributes are highlighted.
+
+#### attributesToSnippet
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+- default: `null`
+
+Default list of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
+If set to null, no snippet is computed.
+
+
+#### highlightPreTag
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `<em>`
+
+Specify the string that is inserted before the highlighted parts in the query result (defaults to `<em>`).
+
+
+#### highlightPostTag
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `<em>`
+
+Specify the string that is inserted after the highlighted parts in the query result (defaults to `</em>`).
+
+### Pagination
+
+#### page
+
+- scope: `search`
+- type: `integer`
+- default: `0`
+
+Pagination parameter used to select the page to retrieve.
+<br>
+Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need to set `page=9`.
+
+#### hitsPerPage
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `20`
+
+Pagination parameter used to select the number of hits per page. Defaults to 20.
+
+
+### Synonyms
+
+#### synonyms
+
+- scope: `search`
+- type: `boolean`
+- default: `true`
+
+If set to false, this query will not use synonyms defined in the configuration.
+
+#### replaceSynonymsInHighlight
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: true
+
+If set to false, words matched via synonym expansion will not be replaced by the matched synonym
+in the highlight results.
+
+
+### Typos
+
+#### minWordSizefor1Typo
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `4`
+
+The minimum number of characters needed to accept one typo.
+
+#### minWordSizefor2Typos
+
+- scope: `indexing`, `search`
+- type: `integer`
+- default: `8`
+
+The minimum number of characters needed to accept two typos.
+
+
+#### typoTolerance
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `true`
+
+This option allows you to control the number of typos allowed in the result set:
+
+* `true`: The typo tolerance is enabled and all matching hits are retrieved (default behavior).
+* `false`: The typo tolerance is disabled. All results with typos will be hidden.
+* `min`: Only keep results with the minimum number of typos. For example, if one result matches without typos, then all results with typos will be hidden.
+* `strict`: Hits matching with 2 typos are not retrieved if there are some matching without typos.
+
+
+#### allowTyposOnNumericTokens
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `true`
+
+If set to false, disables typo tolerance on numeric tokens (numbers).
+
+#### ignorePlural
+
+- scope: `indexing`, `search`
+- type: `boolean`
+- default: `false`
+
+If set to true, plural won't be considered as a typo. For example, car and cars, or foot and feet will be considered as equivalent. Defaults to false.
+
+#### disableTypoToleranceOnAttributes
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: ``
+
+List of attributes on which you want to disable typo tolerance
+(must be a subset of the `attributesToIndex` index setting).
+
+Attributes are separated with a comma such as `"name,address"`.
+You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
+
+#### altCorrections
+
+- scope: `indexing`
+- type: `array of objects`
+- defaults: `[]`
+
+Specify alternative corrections that you want to consider.
+
+Each alternative correction is described by an object containing three attributes:
+* **word**: The word to correct.
+* **correction**: The corrected word.
+* **nbTypos** The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).
+
+For example:
+
+`"altCorrections": [ { "word" : "foot", "correction": "feet", "nbTypos": 1 }, { "word": "feet", "correction": "foot", "nbTypos": 1 } ]`.
+
+
+#### disablePrefixOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable prefix matching
+(must be a subset of the `attributesToIndex` index setting).
+
+This setting is useful on attributes that contain string that should not be matched as a prefix
+(for example a product SKU).
+
+
+#### disableExactOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable the computation of `exact` criteria
+(must be a subset of the `attributesToIndex` index setting).
+
+
+### Geo-Search
+
+
+
+#### aroundLatLng
+
+- scope: `search`
+- type: `string`
+
+Search for entries around a given latitude/longitude (specified as two floats separated by a comma).
+
+For example, `aroundLatLng=47.316669,5.016670`.
+
+- By default the maximum distance is automatically guessed based on the density of the area
+but you can specify it manually in meters with the **aroundRadius** parameter.
+The precision for ranking can be set with **aroundPrecision** parameter.
+- If you set aroundPrecision=100, the distances will be considered by ranges of 100m.
+- For example all distances 0 and 100m will be considered as identical for the "geo" ranking parameter.
+
+When **aroundRadius** is not set, the radius is computed automatically using the density of the area,
+you can retrieve the computed radius in the **automaticRadius** attribute of the answer,
+you can also use the **minimumAroundRadius** query parameter to specify a minimum radius in meters
+for the automatic computation of **aroundRadius**.
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+
+
+
+#### aroundLatLngViaIP
+
+- scope: `search`
+- type: `boolean`
+- default: `false`
+
+Search for entries around a given latitude/longitude automatically computed from user IP address.
+
+To enable it, use `aroundLatLngViaIP=true`.
+
+You can specify the maximum distance in meters with the `aroundRadius` parameter
+and the precision for ranking with `aroundPrecision`.
+
+For example:
+- if you set aroundPrecision=100,
+two objects that are in the range 0-99m
+will be considered as identical in the ranking for the "geo" ranking parameter (same for 100-199, 200-299, ... ranges).
+
+When indexing, you should specify the geo location of an object with the `_geoloc` attribute
+in the form `{"_geoloc":{"lat":48.853409, "lng":2.348800}}`.
+
+
+
+#### insideBoundingBox
+
+- scope: `search`
+- type: `boolean`
+- default: `false`
+
+Search entries inside a given area defined by the two extreme points of a rectangle
+(defined by 4 floats: p1Lat,p1Lng,p2Lat,p2Lng).
+For example:
+- `insideBoundingBox=47.3165,4.9665,47.3424,5.0201`
+
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+
+You can use several bounding boxes (OR) by passing more than 4 values.
+For example: instead of having 4 values you can pass 8 to search inside the UNION of two bounding boxes.
+
+#### insidePolygon
+
+Search entries inside a given area defined by a set of points
+(defined by a minimum of 6 floats: p1Lat,p1Lng,p2Lat,p2Lng,p3Lat,p3Long).
+
+For example:
+`InsidePolygon=47.3165,4.9665,47.3424,5.0201,47.32,4.98`).
+
+
+At indexing, you should specify geoloc of an object with the _geoloc attribute
+(in the form `"_geoloc":{"lat":48.853409, "lng":2.348800}`
+or `"_geoloc":[{"lat":48.853409, "lng":2.348800},{"lat":48.547456, "lng":2.972075}]`
+if you have several geo-locations in your record).
+
+
+### Query Strategy
+
+#### queryType
+
+- scope: `indexing`, `search`
+- default: `prefixLast`
+
+Selects how the query words are interpreted. It can be one of the following values:
+* `prefixAll`:
+All query words are interpreted as prefixes. This option is not recommended.
+* `prefixLast`:
+Only the last word is interpreted as a prefix (default behavior).
+* `prefixNone`:
+No query word is interpreted as a prefix. This option is not recommended.
+
+#### removeWordsIfNoResults
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `none`
+
+This option is used to select a strategy in order to avoid having an empty result page.
+There are four different options:
+- `lastWords`:
+When a query does not return any results, the last word will be added as optional.
+The process is repeated with n-1 word, n-2 word, ... until there are results.
+- `firstWords`:
+When a query does not return any results, the first word will be added as optional.
+The process is repeated with second word, third word, ... until there are results.
+- `allOptional`:
+When a query does not return any results, a second trial will be made with all words as optional.
+This is equivalent to transforming the AND operand between query terms to an OR operand.
+- `none`:
+No specific processing is done when a query does not return any results (default behavior).
+
+
+#### advancedSyntax
+
+- scope: `indexing`, `search`
+- default: `0 (false)`
+
+Enables the advanced query syntax.
+
+This syntax allow to do two things:
+* **Phrase query**: A phrase query defines a particular sequence of terms. A phrase query is built by Algolia's query parser for words surrounded by `"`. For example, `"search engine"` will retrieve records having `search` next to `engine` only. Typo tolerance is _disabled_ on phrase queries.
+* **Prohibit operator**: The prohibit operator excludes records that contain the term after the `-` symbol. For example, `search -engine` will retrieve records containing `search` but not `engine`.
+
+
+#### optionalWords
+
+- scope: `indexing`, `search`
+- default: `[]`
+
+A string that contains the comma separated list of words that should be considered as optional when found in the query.
+
+
+
+#### removeStopWords
+
+- scope: `indexing`, `search`
+- default: `false`
+
+Remove the stop words from query before executing it.
+Defaults to false. Contains a list of stop words from 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu).
+In most use-cases, **we don't recommend enabling this option**.
+
 
 ### Advanced
 
