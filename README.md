@@ -641,82 +641,82 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 
 ### All Parameters
 
-`i`: The setting can only be used in the `setSettings` method
+`indexing`: The setting can only be used in the `setSettings` method
 <br>
-`s`: The setting can only be used in the `search` method
+`search`: The setting can only be used in the `search` method
 <br>
-`i` `s`: The setting can be used in the `setSettings` method and be overriden in the`search` method
+`indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
 
 
-**Query**
-- query `s`
+**Search**
+- query `search`
 
 **Attributes**
-- attributesToIndex `i`
-- numericAttributesToIndex `i`
-- attributesForFaceting `i`
-- unretrievableAttributes `i`
-- restrictSearchableAttributes `s`
-- attributesToRetrieve `i`
+- attributesToIndex `indexing`
+- numericAttributesToIndex `indexing`
+- attributesForFaceting `indexing`
+- unretrievableAttributes `indexing`
+- restrictSearchableAttributes `search`
+- attributesToRetrieve `indexing`
 
 **Ranking**
-- ranking `i`
-- customRanking `i`
-- slaves `i`
+- ranking `indexing`
+- customRanking `indexing`
+- slaves `indexing`
 
 **Filtering / Faceting**
-- numericFilters `s`
-- tagFilters `s`
-- facetFilters `s`
-- maxValuesPerFacet `i` `s`
-- SQL like filters `s`
+- numericFilters `search`
+- tagFilters `search`
+- facetFilters `search`
+- maxValuesPerFacet `indexing` `search`
+- SQL like filters `search`
 
 **Highlighting / Snippeting**
-- attributesToHighlight `i` `s`
-- attributesToSnippet `i` `s`
-- highlightPreTag `i` `s`
-- highlightPostTag `i` `s`
+- attributesToHighlight `indexing` `search`
+- attributesToSnippet `indexing` `search`
+- highlightPreTag `indexing` `search`
+- highlightPostTag `indexing` `search`
 
 **Pagination**
-- page `s`
-- hitsPerPage `i` `s`
+- page `search`
+- hitsPerPage `indexing` `search`
 
 **Synonyms**
-- synonyms `s`
-- replaceSynonymsInHighlight `i` `s`
+- synonyms `search`
+- replaceSynonymsInHighlight `indexing` `search`
 
 **Typos**
-- minWordSizefor1Typo `i` `s`
-- minWordSizefor2Typos `i` `s`
-- typoTolerance `i` `s`
-- allowTyposOnNumericTokens `i` `s`
-- ignorePlural `i` `s`
-- disableTypoToleranceOnAttributes `i` `s`
-- altCorrections `i`
-- disablePrefixOnAttributes `i`
-- disableExactOnAttributes `i`
+- minWordSizefor1Typo `indexing` `search`
+- minWordSizefor2Typos `indexing` `search`
+- typoTolerance `indexing` `search`
+- allowTyposOnNumericTokens `indexing` `search`
+- ignorePlural `indexing` `search`
+- disableTypoToleranceOnAttributes `indexing` `search`
+- altCorrections `indexing`
+- disablePrefixOnAttributes `indexing`
+- disableExactOnAttributes `indexing`
 
 **Geo-Search**
-- aroundLatLng `s`
-- aroundLatLngViaIP `s`
-- insideBoundingBox `s`
-- insidePolygon `s`
+- aroundLatLng `search`
+- aroundLatLngViaIP `search`
+- insideBoundingBox `search`
+- insidePolygon `search`
 
 **Query Strategy**
-- queryType `i` `s`
-- removeWordsIfNoResults `i` `s`
-- advancedSyntax `i` `s`
-- optionalWords `i` `s`
-- removeStopWords `i` `s`
+- queryType `indexing` `search`
+- removeWordsIfNoResults `indexing` `search`
+- advancedSyntax `indexing` `search`
+- optionalWords `indexing` `search`
+- removeStopWords `indexing` `search`
 
 **Advanced**
-- getRankingInfo `s`
-- attributeForDistinct `i`
-- separatorsToIndex `i`
-- allowCompressionOfIntegerArray `i`
-- placeholders `i`
+- getRankingInfo `search`
+- attributeForDistinct `indexing`
+- separatorsToIndex `indexing`
+- allowCompressionOfIntegerArray `indexing`
+- placeholders `indexing`
 
-### Query
+### Search
 
 #### query
 
