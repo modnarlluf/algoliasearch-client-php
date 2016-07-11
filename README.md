@@ -58,8 +58,6 @@ Table of Contents
 
 <!--/NO_HTML-->
 
-
-
 <!--NO_HTML-->
 
 Guides & Tutorials
@@ -88,12 +86,9 @@ Check our [online guides](https://www.algolia.com/doc):
 
 
 
-## Getting Started
 
-
-
-### Install and init `initIndex`
-
+Setup
+============
 To setup your project, follow these steps:
 
 
@@ -116,7 +111,7 @@ require __DIR__ . '/vendor/autoload.php';
 $client = new \AlgoliaSearch\Client('YourApplicationID', 'YourAPIKey');
 ```
 
-#### Framework Integrations
+### Framework Integrations
 
 If you're a Symfony or Laravel user; you're probably looking for the following integrations:
 
@@ -126,7 +121,8 @@ If you're a Symfony or Laravel user; you're probably looking for the following i
 
 
 
-### Quick Start
+Quick Start
+-------------
 
 
 In 30 seconds, this quick start tutorial will show you how to index and search objects.
@@ -220,7 +216,8 @@ function searchCallback(err, content) {
 
 
 
-## Querying
+
+## Search / Find
 
 ### Search in an index - `search`
 
@@ -230,7 +227,11 @@ function searchCallback(err, content) {
   * It will offload unnecessary tasks from your servers.
 
 
+
+
 To perform a search, you only need to initialize the index and perform a call to the search function.
+
+
 
 The search query allows only to retrieve 1000 hits, if you need to retrieve more than 1000 hits for seo, you can use [Backup / Retrieve all index content](#backup--export-an-index)
 
@@ -275,36 +276,7 @@ The server response will look like:
 }
 ```
 
-
-### Multiple queries - `multipleQueries`
-
-You can send multiple queries with a single API call using a batch of queries:
-
-```php
-// perform 3 queries in a single API call:
-//  - 1st query targets index `categories`
-//  - 2nd and 3rd queries target index `products`
-$queries = [
-    ['indexName' => 'categories', 'query' => $myQueryString, 'hitsPerPage' => 3],
-    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 3, 'facetFilters' => 'promotion'],
-    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 10]
-];
-
-$results = $client->multipleQueries($queries);
-
-var_dump(results['results']):
-```
-
-The resulting JSON answer contains a ```results``` array storing the underlying queries answers. The answers order is the same than the requests order.
-
-You can specify a `strategy` parameter to optimize your multiple queries:
-- `none`: Execute the sequence of queries until the end.
-- `stopIfEnoughMatches`: Execute the sequence of queries until the number of hits is reached by the sum of hits.
-
-
-
-
-
+You can use the following optional arguments:
 
 
 ### Find by ids - `getObject(s)`
@@ -327,12 +299,6 @@ You can also retrieve a set of objects:
 ```php
 $index->getObjects(['myID1', 'myID2']);
 ```
-
-
-
-
-
-
 
 
 
@@ -372,24 +338,6 @@ echo 'objectID=' . $res['objectID'] . "\n";
 ```
 
 
-You may want to perform multiple operations with one API call to reduce latency.
-Example using automatic `objectID` assignment:
-```php
-$res = $index->addObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'myID1'
-        ]
-    ]
-);
-```
-
-
 ### Update objects - `saveObject(s)`
 
 You have three options when updating an existing object:
@@ -410,26 +358,6 @@ $index->saveObject(
     ]
 );
 ```
-
-You may want to perform multiple operations with one API call to reduce latency.
-Example with user defined `objectID` (add or update):
-```php
-$res = $index->saveObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'lastname'  => 'Barninger',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'lastname'  => 'Speach',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
 
 ### Partial update objects - `partialUpdateObject(s)`
 
@@ -514,23 +442,6 @@ $index->partialUpdateObject(
 Note: Here we are decrementing the value by `42`. To decrement just by one, put
 `value:1`.
 
-You may want to perform multiple operations with one API call to reduce latency.
-Example that updates only the `firstname` attribute:
-```php
-$res = $index->partialUpdateObjects(
-    [
-        [
-            'firstname' => 'Jimmie',
-            'objectID'  => 'SFO'
-        ],
-        [
-            'firstname' => 'Warren',
-            'objectID'  => 'myID2'
-        ]
-    ]
-);
-```
-
 
 ### Delete objects - `deleteObject(s)`
 
@@ -540,11 +451,6 @@ You can delete an object using its `objectID`:
 $index->deleteObject('myID');
 ```
 
-You may want to perform multiple operations with one API call to reduce latency.
-Example that deletes a set of records:
-```php
-$res = $index->deleteObjects(["myID1", "myID2"]);
-```
 
 ### Delete by query - `deleteByQuery`
 
@@ -555,8 +461,6 @@ You can delete all objects matching a single query with the following code. Inte
 $params = [];
 $index->deleteByQuery('John', $params);
 ```
-
-
 
 
 
@@ -586,40 +490,6 @@ $index->waitTask($res['taskID']);
 If you want to ensure multiple objects have been indexed, you only need to check
 the biggest `taskID`.
 
-### Custom batch - `batch`
-
-If you have one index per user, you may want to perform a batch operations across severals indexes.
-We expose a method to perform this type of batch:
-```php
-$res = $index->batch(
-    [
-        [
-            'action'    => 'addObject',
-            'indexName' => 'index1',
-            [
-                'firstname' => 'Jimmie',
-                'lastname'  => 'Barninger'
-            ]
-        ],
-        [
-            'action'    => 'addObject',
-            'indexName' => 'index1',
-            [
-                'firstname' => 'Warren',
-                'lastname'  => 'myID1'
-            ]
-        ]
-    ]
-);
-```
-
-The attribute **action** can have these values:
-- addObject
-- updateObject
-- partialUpdateObject
-- partialUpdateObjectNoCreate
-- deleteObject
-
 ## Settings
 
 ### Get settings - `getSettings`
@@ -637,10 +507,24 @@ var_dump($settings);
 $index->setSettings(array("customRanking" => array("desc(followers)")));
 ```
 
+## Slave settings
+
+You can forward all settings updates to the slaves of an index by using the `forwardToSlaves` option:
+
+```php
+$index->setSettings(['customRanking' => ['desc(followers)']], true);
+```
+
+
+
 ## Parameters
 
-### All Parameters
+#### Scope
 
+Each parameter in this page has a scope. Depending on the scope, you can use the parameter within the `setSettings`
+and/or the `search` method
+
+They are three scope:
 `indexing`: The setting can only be used in the `setSettings` method
 <br>
 `search`: The setting can only be used in the `search` method
@@ -648,16 +532,17 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 `indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
 
 
+### All Parameters
+
 **Search**
 - query `search`
 
 **Attributes**
 - attributesToIndex `indexing`
-- numericAttributesToIndex `indexing`
 - attributesForFaceting `indexing`
+- attributesToRetrieve `indexing`
 - unretrievableAttributes `indexing`
 - restrictSearchableAttributes `search`
-- attributesToRetrieve `indexing`
 
 **Ranking**
 - ranking `indexing`
@@ -665,24 +550,23 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - slaves `indexing`
 
 **Filtering / Faceting**
-- numericFilters `search`
-- tagFilters `search`
+- filters `search`
 - facetFilters `search`
 - maxValuesPerFacet `indexing` `search`
-- SQL like filters `search`
 
 **Highlighting / Snippeting**
 - attributesToHighlight `indexing` `search`
 - attributesToSnippet `indexing` `search`
 - highlightPreTag `indexing` `search`
 - highlightPostTag `indexing` `search`
+- snippetEllipsisText `indexing` `search`
 
 **Pagination**
 - page `search`
 - hitsPerPage `indexing` `search`
 
 **Synonyms**
-- synonyms `search`
+
 - replaceSynonymsInHighlight `indexing` `search`
 
 **Typos**
@@ -690,11 +574,9 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - minWordSizefor2Typos `indexing` `search`
 - typoTolerance `indexing` `search`
 - allowTyposOnNumericTokens `indexing` `search`
-- ignorePlural `indexing` `search`
+- ignorePlurals `indexing` `search`
 - disableTypoToleranceOnAttributes `indexing` `search`
-- altCorrections `indexing`
-- disablePrefixOnAttributes `indexing`
-- disableExactOnAttributes `indexing`
+- separatorsToIndex `indexing`
 
 **Geo-Search**
 - aroundLatLng `search`
@@ -708,12 +590,23 @@ $index->setSettings(array("customRanking" => array("desc(followers)")));
 - advancedSyntax `indexing` `search`
 - optionalWords `indexing` `search`
 - removeStopWords `indexing` `search`
+- disablePrefixOnAttributes `indexing`
+- disableExactOnAttributes `indexing`
+- exactOnSingleWordQuery `indexing` `search`
+- alternativesAsExact `indexing` `search`
 
 **Advanced**
-- getRankingInfo `search`
 - attributeForDistinct `indexing`
-- separatorsToIndex `indexing`
+- distinct `indexing`, `search`
+- getRankingInfo `search`
+- numericAttributesToIndex `indexing`
 - allowCompressionOfIntegerArray `indexing`
+- numericFilters (deprecated) `search`
+- tagFilters (deprecated) `search`
+- facetFilters (deprecated) `search`
+- synonyms (deprecated) `search`
+- analytics `search`
+- altCorrections `indexing`
 - placeholders `indexing`
 
 ### Search
@@ -756,18 +649,7 @@ which is different than text priority: `attributesToIndex:["title,alternative_ti
 To get a full description of how the Ranking works, you can have a look at our
 [Ranking guide](https://www.algolia.com/doc/relevance/ranking).
 
-#### numericAttributesToIndex
 
-- scope: `indexing`
-- type: `array of strings`
-
-All numerical attributes are automatically indexed as numerical filters
-(allowing filtering operations like `<` and `<=`).
-If you don't need filtering on some of your numerical attributes,
-you can specify this list to speed up the indexing.
-<br/> If you only need to filter on a numeric value with the operator '=',
-you can speed up the indexing by specifying the attribute with `equalOnly(AttributeName)`.
-The other operators will be disabled.
 
 #### attributesForFaceting
 
@@ -791,6 +673,20 @@ and/or ranking but cannot be retrieved
 
 **Warning**: for testing purposes, this setting is ignored when you're using the ADMIN API Key.
 
+#### puts({'C#' => 'SetAttributesToRetrieve', 'Java' => 'setAttributesToRetrieve', 'Android' => 'setAttributesToRetrieve', 'Objective-C' => 'attributesToRetrieve'}, "attributesToRetrieve")
+
+- scope: `indexing`, `search`
+- type: `array of strings`
+
+A string that contains the list of attributes you want to retrieve in order to minimize the size of the JSON answer.
+
+Attributes are separated with a comma (for example `"name,address"`).
+You can also use a string array encoding (for example `["name","address"]` ).
+By default, all attributes are retrieved.
+You can also use `*` to retrieve all values when an **attributesToRetrieve** setting is specified for your index.
+
+`objectID` is always retrieved even when not specified.
+
 
 #### restrictSearchableAttributes
 
@@ -803,12 +699,6 @@ Attributes are separated with a comma such as `"name,address"`.
 You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
 By default, all attributes specified in the `attributesToIndex` settings are used to search.
 
-#### attributesToRetrieve
-
-- scope: `indexing`, `search`
-- type: `array of strings`
-
-Default list of attributes to retrieve in objects. If set to null, all attributes are retrieved.
 
 ### Ranking
 
@@ -871,69 +761,37 @@ update slave indices with the same operations.
 
 ### Filtering / Faceting
 
-#### numericFilters
 
-- scope: `search`
-- type: `array of strings`
-- default: `[]`
+#### 
 
-A string that contains the comma separated list of numeric filters you want to apply.
-The filter syntax is `attributeName` followed by `operand` followed by `value`.
-Supported operands are `<`, `<=`, `=`, `>` and `>=`.
+Filter the query with numeric, facet or/and tag filters.
 
-You can easily perform range queries via the `:` operator.
-This is equivalent to combining a `>=` and `<=` operand.
+The syntax is a SQL like syntax, you can use the OR and AND keywords.
+The syntax for the underlying numeric, facet and tag filters is the same than in the other filters:
 
-For example, `numericFilters=price:10 to 1000`.
+`available=1 AND (category:Book OR NOT category:Ebook) AND _tags:public`
+`date: 1441745506 TO 1441755506 AND inStock > 0 AND author:"John Doe"`
 
-You can also mix OR and AND operators.
-The OR operator is defined with a parenthesis syntax.
+If no attribute name is specified,
+the filter applies to `_tags`.
 
-For example, `(code=1 AND (price:[0-100] OR price:[1000-2000]))`
-translates to `encodeURIComponent("code=1,(price:0 to 100,price:1000 to 2000)")`.
+For example: `public OR user_42` will translate to `_tags:public OR _tags:user_42`.
 
-You can also use a string array encoding (for example `numericFilters: ["price>100","price<1000"]`).
+The list of keywords is:
+* `OR`: create a disjunctive filter between two filters.
+* `AND`: create a conjunctive filter between two filters.
+* `TO`: used to specify a range for a numeric filter.
+* `NOT`: used to negate a filter. The syntax with the `-` isn’t allowed.
 
-#### tagFilters
+*Note*: To specify a value with spaces or with a value equal to a keyword, it's possible to add quotes.
 
-- scope: `search`
-- type: `string`
-- default: `""`
+**Warning:**
 
-Filter the query by a set of tags.
-
-You can AND tags by separating them with commas.
-To OR tags, you must add parentheses.
-
-For example, `tagFilters=tag1,(tag2,tag3)` means *tag1 AND (tag2 OR tag3)*.
-
-You can also use a string array encoding.
-
-For example, `tagFilters: ["tag1",["tag2","tag3"]]` means *tag1 AND (tag2 OR tag3)*.
-
-Negations are supported via the `-` operator, prefixing the value.
-
-For example: `tagFilters=tag1,-tag2`.
-
-At indexing, tags should be added in the **_tags** attribute of objects.
-
-For example `{"_tags":["tag1","tag2"]}`.
+* Like for the other filters (for performance reasons), it's not possible to have FILTER1 OR (FILTER2 AND FILTER3).
+* It's not possible to mix different categories of filters inside an OR like: num=3 OR tag1 OR facet:value
+* It's not possible to negate a group, it's only possible to negate a filter:  NOT(FILTER1 OR (FILTER2) is not allowed.
 
 
-#### facetFilters
-
-- scope: `search`
-- type: `string`
-- default: `""`
-
-Filter the query with a list of facets. Facets are separated by commas and is encoded as `attributeName:value`.
-To OR facets, you must add parentheses.
-
-For example: `facetFilters=(category:Book,category:Movie),author:John%20Doe`.
-
-You can also use a string array encoding.
-
-For example, `[["category:Book","category:Movie"],"author:John%20Doe"]`.
 
 #### 
 
@@ -969,39 +827,9 @@ Limit the number of facet values returned for each facet.
 
 For example, `maxValuesPerFacet=10` will retrieve a maximum of 10 values per facet.
 
-####  -  SQL like filters
-
-Filter the query with numeric, facet or/and tag filters.
-
-The syntax is a SQL like syntax, you can use the OR and AND keywords.
-The syntax for the underlying numeric, facet and tag filters is the same than in the other filters:
-
-`available=1 AND (category:Book OR NOT category:Ebook) AND _tags:public`
-`date: 1441745506 TO 1441755506 AND inStock > 0 AND author:"John Doe"`
-
-If no attribute name is specified,
-the filter applies to `_tags`.
-
-For example: `public OR user_42` will translate to `_tags:public OR _tags:user_42`.
-
-The list of keywords is:
-* `OR`: create a disjunctive filter between two filters.
-* `AND`: create a conjunctive filter between two filters.
-* `TO`: used to specify a range for a numeric filter.
-* `NOT`: used to negate a filter. The syntax with the `-` isn’t allowed.
-
-*Note*: To specify a value with spaces or with a value equal to a keyword, it's possible to add quotes.
-
-**Warning:**
-
-* Like for the other filters (for performance reasons), it's not possible to have FILTER1 OR (FILTER2 AND FILTER3).
-* It's not possible to mix different categories of filters inside an OR like: num=3 OR tag1 OR facet:value
-* It's not possible to negate a group, it's only possible to negate a filter:  NOT(FILTER1 OR (FILTER2) is not allowed.
-
-
 ### Highlighting / Snippeting
 
-#### attributesToHighlight
+#### 
 
 - scope: `indexing`, `search`
 - type: `array of strings`
@@ -1010,7 +838,19 @@ The list of keywords is:
 Default list of attributes to highlight.
 If set to null, all indexed attributes are highlighted.
 
-#### attributesToSnippet
+A string that contains the list of attributes you want to highlight according to the query.
+Attributes are separated by commas.
+You can also use a string array encoding (for example `["name","address"]`).
+If an attribute has no match for the query, the raw value is returned.
+By default, all indexed attributes are highlighted (as long as they are strings).
+You can use `*` if you want to highlight all attributes.
+
+A matchLevel is returned for each highlighted attribute and can contain:
+* `full`: If all the query terms were found in the attribute.
+* `partial`: If only some of the query terms were found.
+* `none`: If none of the query terms were found.
+
+#### 
 
 - scope: `indexing`, `search`
 - type: `array of strings`
@@ -1019,14 +859,14 @@ If set to null, all indexed attributes are highlighted.
 Default list of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
 If set to null, no snippet is computed.
 
-
-#### highlightPreTag
+#### 
 
 - scope: `indexing`, `search`
 - type: `string`
 - default: `<em>`
 
 Specify the string that is inserted before the highlighted parts in the query result (defaults to `<em>`).
+
 
 
 #### highlightPostTag
@@ -1036,6 +876,16 @@ Specify the string that is inserted before the highlighted parts in the query re
 - default: `<em>`
 
 Specify the string that is inserted after the highlighted parts in the query result (defaults to `</em>`).
+
+
+
+#### 
+
+- default: `''`
+- type: `string`
+
+String used as an ellipsis indicator when a snippet is truncated.
+Defaults to an empty string for all accounts created before 10/2/2016, and to … (UTF-8 U+2026) for accounts created after that date.
 
 ### Pagination
 
@@ -1056,27 +906,6 @@ Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need t
 - default: `20`
 
 Pagination parameter used to select the number of hits per page. Defaults to 20.
-
-
-### Synonyms
-
-#### synonyms
-
-- scope: `search`
-- type: `boolean`
-- default: `true`
-
-If set to false, this query will not use synonyms defined in the configuration.
-
-#### replaceSynonymsInHighlight
-
-- scope: `indexing`, `search`
-- type: `boolean`
-- default: true
-
-If set to false, words matched via synonym expansion will not be replaced by the matched synonym
-in the highlight results.
-
 
 ### Typos
 
@@ -1119,7 +948,7 @@ This option allows you to control the number of typos allowed in the result set:
 
 If set to false, disables typo tolerance on numeric tokens (numbers).
 
-#### ignorePlural
+#### ignorePlurals
 
 - scope: `indexing`, `search`
 - type: `boolean`
@@ -1139,45 +968,18 @@ List of attributes on which you want to disable typo tolerance
 Attributes are separated with a comma such as `"name,address"`.
 You can also use JSON string array encoding such as `encodeURIComponent("[\"name\",\"address\"]")`.
 
-#### altCorrections
+#### separatorsToIndex
 
 - scope: `indexing`
-- type: `array of objects`
-- defaults: `[]`
+- type: `string`
+- default: `empty`
 
-Specify alternative corrections that you want to consider.
+Specify the separators (punctuation characters) to index.
 
-Each alternative correction is described by an object containing three attributes:
-* **word**: The word to correct.
-* **correction**: The corrected word.
-* **nbTypos** The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).
+By default, separators are not indexed.
 
-For example:
+Use `+#` to be able to search Google+ or C#.
 
-`"altCorrections": [ { "word" : "foot", "correction": "feet", "nbTypos": 1 }, { "word": "feet", "correction": "foot", "nbTypos": 1 } ]`.
-
-
-#### disablePrefixOnAttributes
-
-- scope: `indexing`
-- type: `string array`
-- default: `[]`
-
-List of attributes on which you want to disable prefix matching
-(must be a subset of the `attributesToIndex` index setting).
-
-This setting is useful on attributes that contain string that should not be matched as a prefix
-(for example a product SKU).
-
-
-#### disableExactOnAttributes
-
-- scope: `indexing`
-- type: `string array`
-- default: `[]`
-
-List of attributes on which you want to disable the computation of `exact` criteria
-(must be a subset of the `attributesToIndex` index setting).
 
 
 ### Geo-Search
@@ -1327,27 +1129,97 @@ This syntax allow to do two things:
 A string that contains the comma separated list of words that should be considered as optional when found in the query.
 
 
-
 #### removeStopWords
 
 - scope: `indexing`, `search`
 - default: `false`
 
-Remove the stop words from query before executing it.
-Defaults to false. Contains a list of stop words from 41 languages (Arabic, Armenian, Basque, Bengali, Brazilian, Bulgarian, Catalan, Chinese, Czech, Danish, Dutch, English, Finnish, French, Galician, German, Greek, Hindi, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Kurdish, Latvian, Lithuanian, Marathi, Norwegian, Persian, Polish, Portugese, Romanian, Russian, Slovak, Spanish, Swedish, Thai, Turkish, Ukranian, Urdu).
-In most use-cases, **we don't recommend enabling this option**.
+Remove stop words from the query **before** executing it. Defaults to `false`.
+Use a boolean to enable/disable all 41 supported languages and a comma separated list
+of iso codes of the languages you want to use consider to enable the stopwords removal
+on a subset of them (select the one you have in your records).
 
+In most use-cases, **you shouldn't need to enable this option**.
+
+List of 41 supported languages with their associated iso code: Arabic=ar, Armenian=hy, Basque=eu, Bengali=bn, Brazilian=pt-br, Bulgarian=bg, Catalan=ca, Chinese=zh, Czech=cs, Danish=da, Dutch=nl, English=en, Finnish=fi, French=fr, Galician=gl, German=de, Greek=el, Hindi=hi, Hungarian=hu, Indonesian=id, Irish=ga, Italian=it, Japanese=ja, Korean=ko, Kurdish=ku, Latvian=lv, Lithuanian=lt, Marathi=mr, Norwegian=no, Persian (Farsi)=fa, Polish=pl, Portugese=pt, Romanian=ro, Russian=ru, Slovak=sk, Spanish=es, Swedish=sv, Thai=th, Turkish=tr, Ukranian=uk, Urdu=ur
+
+Stop words removal is applied on query words that are not interpreted as a prefix. The behavior depends of the queryType parameter:
+
+* `queryType=prefixLast` means the last query word is a prefix and it won’t be considered for stop words removal
+* `queryType=prefixNone` means no query word are prefix, stop words removal will be applied on all query words
+* `queryType=prefixAll` means all query terms are prefix, stop words won’t be removed
+
+This parameter is useful when you have a query in natural language like “what is a record?”.
+In this case, before executing the query, we will remove “what”, “is” and “a” in order to just search for “record”.
+This removal will remove false positive because of stop words, especially when combined with optional words.
+For most use cases, it is better to not use this feature as people search by keywords on search engines.
+
+
+
+#### disablePrefixOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable prefix matching
+(must be a subset of the `attributesToIndex` index setting).
+
+This setting is useful on attributes that contain string that should not be matched as a prefix
+(for example a product SKU).
+
+
+#### disableExactOnAttributes
+
+- scope: `indexing`
+- type: `string array`
+- default: `[]`
+
+List of attributes on which you want to disable the computation of `exact` criteria
+(must be a subset of the `attributesToIndex` index setting).
+
+#### exactOnSingleWordQuery
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `attribute`
+
+This parameter control how the `exact` ranking criterion is computed when the query contains one word. There is three different values:
+* `none`: no exact on single word query
+* `word`: exact set to 1 if the query word is found in the record. The query word needs to have at least 3 chars and not be part of our stop words dictionary
+* `attribute` (default): exact set to 1 if there is an attribute containing a string equals to the query
+
+#### alternativesAsExact
+
+- scope: `indexing`, `search`
+- type: `string`
+- default: `["ignorePlurals", "singleWordSynonym"]`
+
+Specify the list of approximation that should be considered as an exact match in the ranking formula:
+
+* `ignorePlurals`: alternative words added by the ignorePlurals feature
+* `singleWordSynonym`: single-word synonym (For example "NY" = "NYC")
+* `multiWordsSynonym`: multiple-words synonym (For example "NY" = "New York")
 
 ### Advanced
 
-#### 
+#### attributeForDistinct
 
-- scope: `search`
-- type: `boolean`
-- default: `false`
+- scope: `indexing`
+- type: `string`
 
-If set to true,
-the result hits will contain ranking information in the **_rankingInfo** attribute.
+The name of the attribute used for the `Distinct` feature.
+
+This feature is similar to the SQL "distinct" keyword.
+When enabled in queries with the `distinct=1` parameter,
+all hits containing a duplicate value for this attribute are removed from the results.
+
+For example, if the chosen attribute is `show_name` and several hits have the same value for `show_name`,
+then only the first one is kept and the others are removed from the results.
+
+To get a full understanding of how `Distinct` works,
+you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
+
 
 #### 
 
@@ -1368,42 +1240,28 @@ then only the best one is kept and the others are removed.
 To get a full understanding of how `Distinct` works,
 you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
 
-#### attributeForDistinct
-
-- scope: `indexing`
-- type: `string`
-
-The name of the attribute used for the `Distinct` feature.
-
-This feature is similar to the SQL "distinct" keyword.
-When enabled in queries with the `distinct=1` parameter,
-all hits containing a duplicate value for this attribute are removed from the results.
-
-For example, if the chosen attribute is `show_name` and several hits have the same value for `show_name`,
-then only the first one is kept and the others are removed from the results.
-
-To get a full understanding of how `Distinct` works,
-you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
-
 #### 
 
-- scope: `indexing`
+- scope: `search`
 - type: `boolean`
-- default: `true`
+- default: `false`
 
-If set to false, this query will not be taken into account in the analytics feature.
+If set to true,
+the result hits will contain ranking information in the **_rankingInfo** attribute.
 
-#### separatorsToIndex
+#### numericAttributesToIndex
 
 - scope: `indexing`
-- type: `string`
-- default: `empty`
+- type: `array of strings`
 
-Specify the separators (punctuation characters) to index.
+All numerical attributes are automatically indexed as numerical filters
+(allowing filtering operations like `<` and `<=`).
+If you don't need filtering on some of your numerical attributes,
+you can specify this list to speed up the indexing.
+<br/> If you only need to filter on a numeric value with the operator '=',
+you can speed up the indexing by specifying the attribute with `equalOnly(AttributeName)`.
+The other operators will be disabled.
 
-By default, separators are not indexed.
-
-Use `+#` to be able to search Google+ or C#.
 
 #### allowCompressionOfIntegerArray
 
@@ -1417,6 +1275,77 @@ In data-intensive use-cases,
 we recommended enabling this feature and then storing the list of user IDs or rights as an integer array.
 When enabled, the integer array is reordered to reach a better compression ratio.
 
+#### numericFilters (deprecated)
+
+- scope: `search`
+- type: `array of strings`
+- default: `[]`
+
+A string that contains the comma separated list of numeric filters you want to apply.
+The filter syntax is `attributeName` followed by `operand` followed by `value`.
+Supported operands are `<`, `<=`, `=`, `>` and `>=`.
+
+You can easily perform range queries via the `:` operator.
+This is equivalent to combining a `>=` and `<=` operand.
+
+For example, `numericFilters=price:10 to 1000`.
+
+You can also mix OR and AND operators.
+The OR operator is defined with a parenthesis syntax.
+
+For example, `(code=1 AND (price:[0-100] OR price:[1000-2000]))`
+translates to `encodeURIComponent("code=1,(price:0 to 100,price:1000 to 2000)")`.
+
+You can also use a string array encoding (for example `numericFilters: ["price>100","price<1000"]`).
+
+#### tagFilters (deprecated)
+
+- scope: `search`
+- type: `string`
+- default: `""`
+
+Filter the query by a set of tags.
+
+You can AND tags by separating them with commas.
+To OR tags, you must add parentheses.
+
+For example, `tagFilters=tag1,(tag2,tag3)` means *tag1 AND (tag2 OR tag3)*.
+
+You can also use a string array encoding.
+
+For example, `tagFilters: ["tag1",["tag2","tag3"]]` means *tag1 AND (tag2 OR tag3)*.
+
+Negations are supported via the `-` operator, prefixing the value.
+
+For example: `tagFilters=tag1,-tag2`.
+
+At indexing, tags should be added in the **_tags** attribute of objects.
+
+For example `{"_tags":["tag1","tag2"]}`.
+
+
+#### facetFilters (deprecated)
+
+- scope: `search`
+- type: `string`
+- default: `""`
+
+Filter the query with a list of facets. Facets are separated by commas and is encoded as `attributeName:value`.
+To OR facets, you must add parentheses.
+
+For example: `facetFilters=(category:Book,category:Movie),author:John%20Doe`.
+
+You can also use a string array encoding.
+
+For example, `[["category:Book","category:Movie"],"author:John%20Doe"]`.
+
+#### 
+
+- scope: `indexing`
+- type: `boolean`
+- default: `true`
+
+If set to false, this query will not be taken into account in the analytics feature.
 
 #### placeholders
 
@@ -1438,17 +1367,38 @@ For example:
 * Configure the placeholder in your index settings:
 `"placeholders": { "<streetnumber>" : ["1", "2", "3", "4", "5", ... ], ... }`.
 
+#### altCorrections
+
+- scope: `indexing`
+- type: `array of objects`
+- defaults: `[]`
+
+Specify alternative corrections that you want to consider.
+
+Each alternative correction is described by an object containing three attributes:
+* **word**: The word to correct.
+* **correction**: The corrected word.
+* **nbTypos** The number of typos (1 or 2) that will be considered for the ranking algorithm (1 typo is better than 2 typos).
+
+For example:
+
+`"altCorrections": [ { "word" : "foot", "correction": "feet", "nbTypos": 1 }, { "word": "feet", "correction": "foot", "nbTypos": 1 } ]`.
+
 ## Manage Indices
+
+### Create an index
+
+To create an index, you need to perform can perform any indexing operation like:
+- set settings
+- add object
 
 ### List indices - `listIndexes`
 
-You can list all your indices along with their associated information (number of entries, disk size, etc.)
+You can list all your indices along with their associated information (number of entries, disk size, etc.) with the `listIndexes` method:
 
 ```php
 var_dump($client->listIndexes());
 ```
-
-
 
 
 
@@ -1462,31 +1412,28 @@ $client->deleteIndex('contacts');
 ```
 
 
-
-
 ### Clear index - `clearIndex`
-
 You can delete the index contents without removing settings and index specific API keys by using the clearIndex command:
 
 ```php
 $index->clearIndex();
 ```
 
-### Copy index - `copyIndex`
-==================
 
-You can copy using the `copy` command.
+### Copy index - `copyIndex`
+
+You can easily copy or rename an existing index using the `copy` and `move` commands.
 **Note**: Move and copy commands overwrite the destination index.
 
 ```php
+// Rename MyIndex in MyIndexNewName
+$res = $client->moveIndex('MyIndex', 'MyIndexNewName');
 // Copy MyIndex in MyIndexCopy
 $res = $client->copyIndex('MyIndex', 'MyIndexCopy');
 ```
 
 
 ### Move index - `moveIndex`
-
-You can move using the `move` command.
 
 The move command is particularly useful if you want to update a big index atomically from one version to another. For example, if you recreate your index `MyIndex` each night from a database by batch, you only need to:
  1. Import your database into a new index using [batches](#batch-writes). Let's call this new index `MyNewIndex`.
@@ -1496,136 +1443,6 @@ The move command is particularly useful if you want to update a big index atomic
 // Rename MyNewIndex in MyIndex (and overwrite it)
 $res = $client->moveIndex('MyNewIndex', 'MyIndex');
 ```
-
-
-### Get Logs - `getLogs`
-
-You can retrieve the latest logs via this API. Each log entry contains:
- * Timestamp in ISO-8601 format
- * Client IP
- * Request Headers (API Key is obfuscated)
- * Request URL
- * Request method
- * Request body
- * Answer HTTP code
- * Answer body
- * SHA1 ID of entry
-
-You can retrieve the logs of your last 1,000 API calls and browse them using the offset/length parameters:
-
-<table><tbody>
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>offset</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the first entry to retrieve (0-based, 0 is the most recent log entry). Defaults to 0.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>length</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the maximum number of entries to retrieve starting at the offset. Defaults to 10. Maximum allowed value: 1,000.</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>onlyErrors</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Retrieve only logs with an HTTP code different than 200 or 201. (deprecated)</p>
-
-      </td>
-    </tr>
-    
-  
-    <tr>
-      <td valign='top'>
-        <div class='client-readme-param-container'>
-          <div class='client-readme-param-container-inner'>
-            <div class='client-readme-param-name'><code>type</code></div>
-            
-          </div>
-        </div>
-      </td>
-      <td class='client-readme-param-content'>
-        <p>Specify the type of logs to retrieve:</p>
-
-<ul>
-<li><code>query</code>: Retrieve only the queries.</li>
-<li><code>build</code>: Retrieve only the build operations.</li>
-<li><code>error</code>: Retrieve only the errors (same as <code>onlyErrors</code> parameters).</li>
-</ul>
-
-      </td>
-    </tr>
-    
-</tbody></table>
-
-```php
-// Get last 10 log entries
-$res = $client->getLogs();
-
-// Get last 100 log entries
-$res = $client->getLogs(0, 100);
-```
-
-browse`
-
-The `search` method cannot return more than 1,000 results. If you need to
-retrieve all the content of your index (for backup, SEO purposes or for running
-a script on it), you should use the `browse` method instead. This method lets
-you retrieve objects beyond the 1,000 limit.
-
-This method is optimized for speed. To make it fast, distinct, typo-tolerance,
-word proximity, geo distance and number of matched words are disabled. Results
-are still returned ranked by attributes and custom ranking.
-
-
-It will return a `cursor` alongside your data, that you can then use to retrieve
-the next chunk of your records.
-
-You can specify custom parameters (like `page` or `hitsPerPage`) on your first
-`browse` call, and these parameters will then be included in the `cursor`. Note
-that it is not possible to access records beyond the 1,000th on the first call.
-
-Example:
-
-```php
-// Iterate with a filter over the index
-foreach ($this->index->browse('', ['filters' => 'i<42']) as $hit) {
-    print_r($hit);
-}
-
-$next_cursor = $this->index->browseFrom('', ['numericFilters' => 'i<42'])['cursor'];
-```
-
-
-
 
 
 
@@ -1639,9 +1456,7 @@ The **admin** API key provides full control of all your indices. *The admin API 
 You can also generate user API keys to control security.
 These API keys can be restricted to a set of operations or/and restricted to a given index.
 
-
-
-### Secured API keys - `generateSecuredApiKey`
+### Generate key `generateSecuredApiKey`
 
 You may have a single index containing **per user** data. In that case, all records should be tagged with their associated `user_id` in order to add a `tagFilters=user_42` filter at query time to retrieve only what a user has access to. If you're using the [JavaScript client](http://github.com/algolia/algoliasearch-client-js), it will result in a security breach since the user is able to modify the `tagFilters` you've set by modifying the code from the browser. To keep using the JavaScript client (recommended for optimal latency) and target secured records, you can generate a secured API key from your backend:
 
@@ -1698,6 +1513,159 @@ index.search('another query', function(err, content) {
 
 
 
+## Advanced
+
+### Custom batch - `batch`
+
+You may want to perform multiple operations with one API call to reduce latency.
+We expose four methods to perform batch operations:
+ * `addObjects`: Add an array of objects using automatic `objectID` assignment.
+ * `saveObjects`: Add or update an array of objects that contains an `objectID` attribute.
+ * `deleteObjects`: Delete an array of objectIDs.
+ * `partialUpdateObjects`: Partially update an array of objects that contain an `objectID` attribute (only specified attributes will be updated).
+
+Example using automatic `objectID` assignment:
+```php
+$res = $index->addObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'myID1'
+        ]
+    ]
+);
+```
+
+Example with user defined `objectID` (add or update):
+```php
+$res = $index->saveObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'lastname'  => 'Barninger',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'lastname'  => 'Speach',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
+
+Example that deletes a set of records:
+```php
+$res = $index->deleteObjects(["myID1", "myID2"]);
+```
+
+Example that updates only the `firstname` attribute:
+```php
+$res = $index->partialUpdateObjects(
+    [
+        [
+            'firstname' => 'Jimmie',
+            'objectID'  => 'SFO'
+        ],
+        [
+            'firstname' => 'Warren',
+            'objectID'  => 'myID2'
+        ]
+    ]
+);
+```
+
+
+Custom batch:
+```php
+$res = $index->batch(
+    [
+        'requests' => [
+            [
+                'action' => 'addObject',
+                'body'   => ['firstname' => 'Jimmie', 'lastname' => 'Barninger']
+            ],
+            [
+                'action' => 'addObject',
+                'body'   => ['Warren' => 'Jimmie', 'lastname' => 'Speach']
+            ],
+            [
+                'action'   => 'updateObject',
+                'objectID' => 'myID3',
+                'body'     => ['firstname' => 'Rob']
+            ],
+        ]
+    ]
+);
+```
+
+
+If you have one index per user, you may want to perform a batch operations across severals indexes.
+We expose a method to perform this type of batch:
+```php
+$res = $index->batch(
+    [
+        [
+            'action'    => 'addObject',
+            'indexName' => 'index1',
+            [
+                'firstname' => 'Jimmie',
+                'lastname'  => 'Barninger'
+            ]
+        ],
+        [
+            'action'    => 'addObject',
+            'indexName' => 'index1',
+            [
+                'firstname' => 'Warren',
+                'lastname'  => 'myID1'
+            ]
+        ]
+    ]
+);
+```
+
+The attribute **action** can have these values:
+- addObject
+- updateObject
+- partialUpdateObject
+- partialUpdateObjectNoCreate
+- deleteObject
+
+### Backup / Export an index - `browse`
+
+The `search` method cannot return more than 1,000 results. If you need to
+retrieve all the content of your index (for backup, SEO purposes or for running
+a script on it), you should use the `browse` method instead. This method lets
+you retrieve objects beyond the 1,000 limit.
+
+This method is optimized for speed. To make it fast, distinct, typo-tolerance,
+word proximity, geo distance and number of matched words are disabled. Results
+are still returned ranked by attributes and custom ranking.
+
+
+It will return a `cursor` alongside your data, that you can then use to retrieve
+the next chunk of your records.
+
+You can specify custom parameters (like `page` or `hitsPerPage`) on your first
+`browse` call, and these parameters will then be included in the `cursor`. Note
+that it is not possible to access records beyond the 1,000th on the first call.
+
+Example:
+
+```php
+// Iterate with a filter over the index
+foreach ($this->index->browse('', ['filters' => 'i<42']) as $hit) {
+    print_r($hit);
+}
+
+$next_cursor = $this->index->browseFrom('', ['numericFilters' => 'i<42'])['cursor'];
+```
+
 
 ### List api keys - `listApiKeys`
 
@@ -1721,7 +1689,6 @@ Each key is defined by a set of permissions that specify the authorized actions.
  * **editSettings**: Allowed to change index settings.
  * **analytics**: Allowed to retrieve analytics through the analytics API.
  * **listIndexes**: Allowed to list all accessible indexes.
-
 
 ### Add user key - `addUserKey`
 
@@ -1886,9 +1853,16 @@ echo 'key=' . $res['key'] . "\n";
 $res = $index->updateUserKey('myAPIKey', ['search'], 300, 100, 20);
 echo 'key=' . $res['key'] . "\n";
 ```
+To get the permissions of a given key:
+```php
+// Gets the rights of a global key
+$res = $client->getUserKeyACL('f420238212c54dcfad07ea0aa6d5c45f');
+
+// Gets the rights of an index specific key
+$res = $index->getUserKeyACL('71671c38001bf3ac857bc82052485107');
+```
 
 ### Delete user key - `deleteUserKey`
-
 To delete an existing key:
 ```php
 // Deletes a global key
@@ -1900,6 +1874,8 @@ $res = $index->deleteUserKey('71671c38001bf3ac857bc82052485107');
 
 ### Get key permissions - `getUserKeyACL`
 
+
+
 To get the permissions of a given key:
 ```php
 // Gets the rights of a global key
@@ -1908,6 +1884,137 @@ $res = $client->getUserKeyACL('f420238212c54dcfad07ea0aa6d5c45f');
 // Gets the rights of an index specific key
 $res = $index->getUserKeyACL('71671c38001bf3ac857bc82052485107');
 ```
+
+
+
+### Multiple queries - `multipleQueries`
+
+You can send multiple queries with a single API call using a batch of queries:
+
+```php
+// perform 3 queries in a single API call:
+//  - 1st query targets index `categories`
+//  - 2nd and 3rd queries target index `products`
+$queries = [
+    ['indexName' => 'categories', 'query' => $myQueryString, 'hitsPerPage' => 3],
+    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 3, 'facetFilters' => 'promotion'],
+    ['indexName' => 'products', 'query' => $myQueryString, 'hitsPerPage' => 10]
+];
+
+$results = $client->multipleQueries($queries);
+
+var_dump(results['results']):
+```
+
+The resulting JSON answer contains a ```results``` array storing the underlying queries answers. The answers order is the same than the requests order.
+
+You can specify a `strategy` parameter to optimize your multiple queries:
+- `none`: Execute the sequence of queries until the end.
+- `stopIfEnoughMatches`: Execute the sequence of queries until the number of hits is reached by the sum of hits.
+
+
+
+### Get Logs - `getLogs`
+
+You can retrieve the latest logs via this API. Each log entry contains:
+ * Timestamp in ISO-8601 format
+ * Client IP
+ * Request Headers (API Key is obfuscated)
+ * Request URL
+ * Request method
+ * Request body
+ * Answer HTTP code
+ * Answer body
+ * SHA1 ID of entry
+
+You can retrieve the logs of your last 1,000 API calls and browse them using the offset/length parameters:
+
+<table><tbody>
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>offset</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the first entry to retrieve (0-based, 0 is the most recent log entry). Defaults to 0.</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>length</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the maximum number of entries to retrieve starting at the offset. Defaults to 10. Maximum allowed value: 1,000.</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>onlyErrors</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Retrieve only logs with an HTTP code different than 200 or 201. (deprecated)</p>
+
+      </td>
+    </tr>
+    
+  
+    <tr>
+      <td valign='top'>
+        <div class='client-readme-param-container'>
+          <div class='client-readme-param-container-inner'>
+            <div class='client-readme-param-name'><code>type</code></div>
+            
+          </div>
+        </div>
+      </td>
+      <td class='client-readme-param-content'>
+        <p>Specify the type of logs to retrieve:</p>
+
+<ul>
+<li><code>query</code>: Retrieve only the queries.</li>
+<li><code>build</code>: Retrieve only the build operations.</li>
+<li><code>error</code>: Retrieve only the errors (same as <code>onlyErrors</code> parameters).</li>
+</ul>
+
+      </td>
+    </tr>
+    
+</tbody></table>
+
+```php
+// Get last 10 log entries
+$res = $client->getLogs();
+
+// Get last 100 log entries
+$res = $client->getLogs(0, 100);
+```
+
+
+
+
+
+
 
 
 
