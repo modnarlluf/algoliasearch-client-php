@@ -507,7 +507,7 @@ var_dump($settings);
 $index->setSettings(array("customRanking" => array("desc(followers)")));
 ```
 
-## Slave settings
+### Slave settings
 
 You can forward all settings updates to the slaves of an index by using the `forwardToSlaves` option:
 
