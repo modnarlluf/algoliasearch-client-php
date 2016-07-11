@@ -87,8 +87,8 @@ Check our [online guides](https://www.algolia.com/doc):
 
 
 
-Setup
-============
+## Getting Started
+
 To setup your project, follow these steps:
 
 
