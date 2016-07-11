@@ -113,7 +113,7 @@ $client = new \AlgoliaSearch\Client('YourApplicationID', 'YourAPIKey');
 
 ### Framework Integrations
 
-If you're a Symfony or Laravel user; you're probably looking for the following integrations:
+If you're a Symfony or Laravel user, you're probably looking for the following integrations
 
  - **Laravel**: [algolia/algoliasearch-laravel](https://github.com/algolia/algoliasearch-laravel)
  - **Symfony**: [algolia/AlgoliaSearchBundle](https://github.com/algolia/AlgoliaSearchBundle)
@@ -456,6 +456,8 @@ $index->deleteObject('myID');
 
 You can delete all objects matching a single query with the following code. Internally, the API client performs the query, deletes all matching hits, and waits until the deletions have been applied.
 
+
+Take your precautions when using this method. Calling it with an empty query will result in cleaning the index of all its records.
 
 ```php
 $params = [];
