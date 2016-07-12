@@ -89,6 +89,8 @@ Check our [online guides](https://www.algolia.com/doc):
 
 ## Getting Started
 
+### Install and init `initIndex`
+
 To setup your project, follow these steps:
 
 
@@ -111,7 +113,7 @@ require __DIR__ . '/vendor/autoload.php';
 $client = new \AlgoliaSearch\Client('YourApplicationID', 'YourAPIKey');
 ```
 
-### Framework Integrations
+#### Framework Integrations
 
 If you're a Symfony or Laravel user, you're probably looking for the following integrations
 
@@ -121,8 +123,7 @@ If you're a Symfony or Laravel user, you're probably looking for the following i
 
 
 
-Quick Start
--------------
+### Quick Start
 
 
 In 30 seconds, this quick start tutorial will show you how to index and search objects.
