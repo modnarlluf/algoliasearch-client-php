@@ -217,7 +217,7 @@ function searchCallback(err, content) {
 
 
 
-## Search / Find
+## Search - Find
 
 ### Search in an index - `search`
 
