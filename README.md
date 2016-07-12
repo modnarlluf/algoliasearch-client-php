@@ -279,7 +279,7 @@ The server response will look like:
 You can use the following optional arguments:
 
 
-### Find by ids - `getObject(s)`
+### Find by ids - `getObjects`
 
 You can easily retrieve an object using its `objectID` and optionally specify a comma separated list of attributes you want:
 
@@ -304,7 +304,7 @@ $index->getObjects(['myID1', 'myID2']);
 
 ## Indexing
 
-### Add objects - `addObject(s)`
+### Add objects - `addObjects`
 
 Each entry in an index has a unique identifier called `objectID`. There are two ways to add an entry to the index:
 
@@ -338,7 +338,7 @@ echo 'objectID=' . $res['objectID'] . "\n";
 ```
 
 
-### Update objects - `saveObject(s)`
+### Update objects - `saveObjects`
 
 You have three options when updating an existing object:
 
@@ -359,7 +359,7 @@ $index->saveObject(
 );
 ```
 
-### Partial update - `partialUpdateObject(s)`
+### Partial update - `partialUpdateObjects`
 
 You have many ways to update an object's attributes:
 
@@ -443,7 +443,7 @@ Note: Here we are decrementing the value by `42`. To decrement just by one, put
 `value:1`.
 
 
-### Delete objects - `deleteObject(s)`
+### Delete objects - `deleteObjects`
 
 You can delete an object using its `objectID`:
 
