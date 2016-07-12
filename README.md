@@ -677,7 +677,7 @@ and/or ranking but cannot be retrieved
 
 **Warning**: for testing purposes, this setting is ignored when you're using the ADMIN API Key.
 
-#### puts({'C#' => 'SetAttributesToRetrieve', 'Java' => 'setAttributesToRetrieve', 'Android' => 'setAttributesToRetrieve', 'Objective-C' => 'attributesToRetrieve'}, "attributesToRetrieve")
+#### 
 
 - scope: `indexing`, `search`
 - type: `array of strings`
