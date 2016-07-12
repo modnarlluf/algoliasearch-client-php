@@ -359,7 +359,7 @@ $index->saveObject(
 );
 ```
 
-### Partial update objects - `partialUpdateObject(s)`
+### Partial update - `partialUpdateObject(s)`
 
 You have many ways to update an object's attributes:
 
