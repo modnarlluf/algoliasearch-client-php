@@ -677,7 +677,7 @@ and/or ranking but cannot be retrieved
 
 **Warning**: for testing purposes, this setting is ignored when you're using the ADMIN API Key.
 
-#### 
+#### attributesToRetrieve
 
 - scope: `indexing`, `search`
 - type: `array of strings`
@@ -766,7 +766,7 @@ update slave indices with the same operations.
 ### Filtering / Faceting
 
 
-#### 
+#### filters
 
 Filter the query with numeric, facet or/and tag filters.
 
@@ -797,7 +797,7 @@ The list of keywords is:
 
 
 
-#### 
+#### facets
 
 - scope: `search`
 - type: `string`
@@ -833,7 +833,7 @@ For example, `maxValuesPerFacet=10` will retrieve a maximum of 10 values per fac
 
 ### Highlighting / Snippeting
 
-#### 
+#### attributesToHighlight
 
 - scope: `indexing`, `search`
 - type: `array of strings`
@@ -854,7 +854,7 @@ A matchLevel is returned for each highlighted attribute and can contain:
 * `partial`: If only some of the query terms were found.
 * `none`: If none of the query terms were found.
 
-#### 
+#### attributesToSnippet
 
 - scope: `indexing`, `search`
 - type: `array of strings`
@@ -863,7 +863,7 @@ A matchLevel is returned for each highlighted attribute and can contain:
 Default list of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
 If set to null, no snippet is computed.
 
-#### 
+#### highlightPreTag
 
 - scope: `indexing`, `search`
 - type: `string`
@@ -883,7 +883,7 @@ Specify the string that is inserted after the highlighted parts in the query res
 
 
 
-#### 
+#### snippetEllipsisText
 
 - default: `''`
 - type: `string`
@@ -1225,7 +1225,7 @@ To get a full understanding of how `Distinct` works,
 you can have a look at our [guide on distinct](https://www.algolia.com/doc/search/distinct).
 
 
-#### 
+#### distinct
 
 - scope: `indexing`, `search`
 - type: `boolean`
@@ -1343,7 +1343,7 @@ You can also use a string array encoding.
 
 For example, `[["category:Book","category:Movie"],"author:John%20Doe"]`.
 
-#### 
+#### analytics
 
 - scope: `indexing`
 - type: `boolean`
