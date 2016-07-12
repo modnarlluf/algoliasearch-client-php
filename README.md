@@ -529,11 +529,9 @@ Each parameter in this page has a scope. Depending on the scope, you can use the
 and/or the `search` method
 
 They are three scope:
-`indexing`: The setting can only be used in the `setSettings` method
-<br>
-`search`: The setting can only be used in the `search` method
-<br>
-`indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
+- `indexing`: The setting can only be used in the `setSettings` method
+- `search`: The setting can only be used in the `search` method
+- `indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
 
 
 #### Parameters List
