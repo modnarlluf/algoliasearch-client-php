@@ -37,23 +37,49 @@ Table of Contents
 
 **Commands Reference**
 
-1. [Add a new object](#add-a-new-object-to-the-index)
-1. [Update an object](#update-an-existing-object-in-the-index)
+Getting started
+1. [Init Index](#install-and-init---initindex)
+
+Search
 1. [Search](#search)
-1. [Multiple queries](#multiple-queries)
-1. [Get an object](#get-an-object)
-1. [Delete an object](#delete-an-object)
-1. [Delete by query](#delete-by-query)
-1. [Index settings](#index-settings)
-1. [List indices](#list-indices)
-1. [Delete an index](#delete-an-index)
-1. [Clear an index](#clear-an-index)
-1. [Wait indexing](#wait-indexing)
-1. [Batch writes](#batch-writes)
-1. [Copy / Move an index](#copy--move-an-index)
-1. [Backup / Export an index](#backup--export-an-index)
-1. [API Keys](#api-keys)
-1. [Logs](#logs)
+1. [Find by id](#find-by-ids---getobjects)
+
+Indexing
+
+1. [Add objects](#add-objects---addobjects)
+1. [Update objects](#update-objects---saveobjects)
+1. [Partial Update objects](#partial-update---partialupdateobjects)
+1. [Delete objects](#delete-objects---deleteobjects)
+
+Settings
+
+1. [Get settings](#get-settings---getsettings)
+1. [Set settings](#set-settings---setsettings)
+
+Manage Indices
+
+1. [List indices](#list-indices---listindexes)
+1. [Delete an index](#delete-index---deleteindex)
+1. [Clear an index](#clear-index---clearindex)
+1. [Copy an index](#copy-index---copyindex)
+1. [Move an index](#move-index---moveindex)
+
+Api Keys
+1. [Generate API keys](#generate-key---generatesecuredapikey)
+
+Advanced
+
+1. [Custom batch](#custom-batch---batch)
+1. [Wait for an indexing operation](#wait-for-an-indexing-operation---waittask)
+1. [Multiple queries](#multiple-queries---multiplequeries)
+1. [Delete by query](#delete-by-query---deletebyquery)
+1. [Backup / Export an index](#backup--export-an-index---browse)
+1. [List api keys](#list-api-keys---listapikeys)
+1. [Add user key](#add-user-key---adduserkey)
+1. [Update user key](#update-user-key---updateuserkey)
+1. [Delete user key](#delete-user-key---deleteuserkey)
+1. [Get key permissions](#get-key-permissions---getuserkeyacl)
+1. [Get Logs](#get-logs---getlogs)
 
 
 <!--/NO_HTML-->
