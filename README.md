@@ -89,7 +89,7 @@ Check our [online guides](https://www.algolia.com/doc):
 
 ## Getting Started
 
-### Install and init `initIndex`
+### Install and init - `initIndex`
 
 To setup your project, follow these steps:
 
@@ -1459,7 +1459,7 @@ The **admin** API key provides full control of all your indices. *The admin API 
 You can also generate user API keys to control security.
 These API keys can be restricted to a set of operations or/and restricted to a given index.
 
-### Generate key `generateSecuredApiKey`
+### Generate key - `generateSecuredApiKey`
 
 You may have a single index containing **per user** data. In that case, all records should be tagged with their associated `user_id` in order to add a `tagFilters=user_42` filter at query time to retrieve only what a user has access to. If you're using the [JavaScript client](http://github.com/algolia/algoliasearch-client-js), it will result in a security breach since the user is able to modify the `tagFilters` you've set by modifying the code from the browser. To keep using the JavaScript client (recommended for optimal latency) and target secured records, you can generate a secured API key from your backend:
 
