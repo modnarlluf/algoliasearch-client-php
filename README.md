@@ -528,7 +528,7 @@ $index->setSettings(['customRanking' => ['desc(followers)']], true);
 Each parameter in this page has a scope. Depending on the scope, you can use the parameter within the `setSettings`
 and/or the `search` method
 
-They are three scope:
+They are three scopes:
 - `indexing`: The setting can only be used in the `setSettings` method
 - `search`: The setting can only be used in the `search` method
 - `indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
