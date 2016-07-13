@@ -608,7 +608,7 @@ $index->setSettings(['customRanking' => ['desc(followers)']], true);
 
 
 
-### Indexing parameters
+### Index settings parameters
 
 <!--PARAMETERS_LINK-->
 
