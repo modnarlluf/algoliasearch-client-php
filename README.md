@@ -727,7 +727,8 @@ They are three scopes:
 
 **Geo-Search**
 
-- [aroundLatLng](#aroundlatlng) `search`- [aroundLatLngViaIP](#aroundlatlngviaip) `search`
+- [aroundLatLng](#aroundlatlng) `search`
+- [aroundLatLngViaIP](#aroundlatlngviaip) `search`
 - [insideBoundingBox](#insideboundingbox) `search`
 - [insidePolygon](#insidepolygon) `search`
 
