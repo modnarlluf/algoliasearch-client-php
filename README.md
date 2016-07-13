@@ -307,10 +307,10 @@ You can use the following optional arguments:
 
 ### Search Parameters
 
-Here is the list of parameters you can use with the search method (`search` [scope](https://algolia.com/doc/api-client/parameters#scope)):
-Parameters that can also be used in a setSettings also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
-
 <!--PARAMETERS_LINK-->
+Here is the list of parameters you can use with the search method (`search` [scope](#scope)):
+Parameters that can also be used in a setSettings also have the `indexing` [scope](#scope)
+
 **Search**
 - [query](#query) `search`
 
@@ -609,10 +609,10 @@ $index->setSettings(['customRanking' => ['desc(followers)']], true);
 
 ### Indexing parameters
 
-Here is the list of parameters you can use with the set settings method (`indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)):
-Parameters that can be override at search time also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
-
 <!--PARAMETERS_LINK-->
+
+Here is the list of parameters you can use with the set settings method (`indexing` [scope](#scope)):
+Parameters that can be override at search time also have the `indexing` [scope](#scope)
 
 **Attributes**
 - [attributesToIndex](#attributestoindex) `settings`
