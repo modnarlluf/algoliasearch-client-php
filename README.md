@@ -363,7 +363,7 @@ Parameters that can also be used in a setSettings also have the `indexing` [scop
 
 **Advanced**
 - [distinct](#distinct) `settings`, `search`
-- [](#) `search`
+- [rankingInfo](#rankinginfo) `search`
 - [numericFilters (deprecated)](#numericfilters-deprecated) `search`
 - [tagFilters (deprecated)](#tagfilters-deprecated) `search`
 - [facetFilters (deprecated)](#facetfilters-deprecated) `search`
@@ -751,7 +751,7 @@ They are three scopes:
 **Advanced**
 - [attributeForDistinct](#attributefordistinct) `settings`
 - [distinct](#distinct) `settings`, `search`
-- [rankingInfo](#) `search`
+- [rankingInfo](#rankinginfo) `search`
 - [numericAttributesToIndex](#numericattributestoindex) `settings`
 - [allowCompressionOfIntegerArray](#allowcompressionofintegerarray) `settings`
 - [numericFilters (deprecated)](#numericfilters-deprecated) `search`
