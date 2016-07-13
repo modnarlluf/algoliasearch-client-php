@@ -365,6 +365,7 @@ Parameters that can also be used in a setSettings also have the `indexing` [scop
 - [tagFilters (deprecated)](#tagfilters-deprecated) `search`
 - [facetFilters (deprecated)](#facetfilters-deprecated) `search`
 - [analytics](#analytics) `search`
+
 <!--/PARAMETERS_LINK-->
 
 ### Find by ids - `getObjects`
