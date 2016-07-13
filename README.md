@@ -731,7 +731,6 @@ They are three scopes:
 - [aroundLatLng](#aroundlatlng) `search`
 
 
-
 - [aroundLatLngViaIP](#aroundlatlngviaip) `search`
 - [insideBoundingBox](#insideboundingbox) `search`
 - [insidePolygon](#insidepolygon) `search`
