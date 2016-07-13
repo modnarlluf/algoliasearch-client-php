@@ -310,6 +310,7 @@ You can use the following optional arguments:
 Here is the list of parameters you can use with the search method (`search` [scope](https://algolia.com/doc/api-client/parameters#scope)):
 Parameters that can also be used in a setSettings also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
 
+<!--PARAMETERS_LINK-->
 **Search**
 - [query](#query) `search`
 
@@ -364,6 +365,7 @@ Parameters that can also be used in a setSettings also have the `indexing` [scop
 - [tagFilters (deprecated)](#tagfilters-deprecated) `search`
 - [facetFilters (deprecated)](#facetfilters-deprecated) `search`
 - [analytics](#analytics) `search`
+<!--/PARAMETERS_LINK-->
 
 ### Find by ids - `getObjects`
 
@@ -610,6 +612,8 @@ $index->setSettings(['customRanking' => ['desc(followers)']], true);
 Here is the list of parameters you can use with the set settings method (`indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)):
 Parameters that can be override at search time also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
 
+<!--PARAMETERS_LINK-->
+
 **Attributes**
 - [attributesToIndex](#attributestoindex) `settings`
 - [attributesForFaceting](#attributesforfaceting) `settings`
@@ -662,6 +666,7 @@ Parameters that can be override at search time also have the `indexing` [scope](
 - [altCorrections](#altcorrections) `settings`
 - [placeholders](#placeholders) `settings`
 
+<!--/PARAMETERS_LINK-->
 
 ## Parameters
 
