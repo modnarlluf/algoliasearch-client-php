@@ -342,15 +342,11 @@ Parameters that can also be used in a setSettings also have the `indexing` [scop
 
 **Geo-Search**
 
-
 - [aroundLatLng](#aroundlatlng) `search`
-
-
 
 - [aroundLatLngViaIP](#aroundlatlngviaip) `search`
 - [insideBoundingBox](#insideboundingbox) `search`
 - [insidePolygon](#insidepolygon) `search`
-
 
 **Query Strategy**
 - [queryType](#querytype) `settings` `search`
