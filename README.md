@@ -209,7 +209,7 @@ var_dump($index->search('jim'));
   * It will offload unnecessary tasks from your servers
 
 ```html
-<script src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
 <script>
 var client = algoliasearch('ApplicationID', 'apiKey');
 var index = client.initIndex('indexName');
@@ -305,6 +305,69 @@ The server response will look like:
 
 You can use the following optional arguments:
 
+### Search Parameters
+
+Here is the list of parameters you can use with the search method (`search` [scope](https://algolia.com/doc/api-client/parameters#scope)):
+Parameters that can also be used in a setSettings also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
+
+**Search**
+- [query](#query) `search`
+
+**Attributes**
+- [attributesToRetrieve](#attributestoretrieve) `search`
+
+**Filtering / Faceting**
+- [filters](#filters) `search`
+- [facets](#facets) `search`
+- [maxValuesPerFacet](#maxvaluesperfacet) `settings` `search`
+
+**Highlighting / Snippeting**
+- [attributesToHighlight](#attributestohighlight) `settings` `search`
+- [attributesToSnippet](#attributestosnippet) `settings` `search`
+- [highlightPreTag](#highlightpretag) `settings` `search`
+- [highlightPostTag](#highlightposttag) `settings` `search`
+- [snippetEllipsisText](#snippetellipsistext) `settings` `search`
+
+**Pagination**
+- [page](#page) `search`
+- [hitsPerPage](#hitsperpage) `settings` `search`
+
+**Typos**
+- [minWordSizefor1Typo](#minwordsizefor1typo) `settings` `search`
+- [minWordSizefor2Typos](#minwordsizefor2typos) `settings` `search`
+- [typoTolerance](#typotolerance) `settings` `search`
+- [allowTyposOnNumericTokens](#allowtyposonnumerictokens) `settings` `search`
+- [ignorePlurals](#ignoreplurals) `settings` `search`
+- [disableTypoToleranceOnAttributes](#disabletypotoleranceonattributes) `settings` `search`
+
+**Geo-Search**
+
+
+- [aroundLatLng](#aroundlatlng) `search`
+
+
+
+- [aroundLatLngViaIP](#aroundlatlngviaip) `search`
+- [insideBoundingBox](#insideboundingbox) `search`
+- [insidePolygon](#insidepolygon) `search`
+
+
+**Query Strategy**
+- [queryType](#querytype) `settings` `search`
+- [removeWordsIfNoResults](#removewordsifnoresults) `settings` `search`
+- [advancedSyntax](#advancedsyntax) `settings` `search`
+- [optionalWords](#optionalwords) `settings` `search`
+- [removeStopWords](#removestopwords) `settings` `search`
+- [exactOnSingleWordQuery](#exactonsinglewordquery) `settings` `search`
+- [alternativesAsExact](#alternativesasexact) `settings` `search`
+
+**Advanced**
+- [distinct](#distinct) `settings`, `search`
+- [](#) `search`
+- [numericFilters (deprecated)](#numericfilters-deprecated) `search`
+- [tagFilters (deprecated)](#tagfilters-deprecated) `search`
+- [facetFilters (deprecated)](#facetfilters-deprecated) `search`
+- [analytics](#analytics) `search`
 
 ### Find by ids - `getObjects`
 
@@ -536,7 +599,7 @@ var_dump($settings);
 $index->setSettings(array("customRanking" => array("desc(followers)")));
 ```
 
-### Slave settings
+#### Slave settings
 
 You can forward all settings updates to the slaves of an index by using the `forwardToSlaves` option:
 
@@ -544,6 +607,64 @@ You can forward all settings updates to the slaves of an index by using the `for
 $index->setSettings(['customRanking' => ['desc(followers)']], true);
 ```
 
+
+
+### Indexing parameters
+
+Here is the list of parameters you can use with the set settings method (`indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)):
+Parameters that can be override at search time also have the `indexing` [scope](https://algolia.com/doc/api-client/parameters#scope)
+
+**Attributes**
+- [attributesToIndex](#attributestoindex) `settings`
+- [attributesForFaceting](#attributesforfaceting) `settings`
+- [attributesToRetrieve](#attributestoretrieve) `settings`
+- [unretrievableAttributes](#unretrievableattributes) `settings`
+
+**Ranking**
+- [ranking](#ranking) `settings`
+- [customRanking](#customranking) `settings`
+- [slaves](#slaves) `settings`
+
+**Filtering / Faceting**
+- [maxValuesPerFacet](#maxvaluesperfacet) `settings` `search`
+
+**Highlighting / Snippeting**
+- [attributesToHighlight](#attributestohighlight) `settings` `search`
+- [attributesToSnippet](#attributestosnippet) `settings` `search`
+- [highlightPreTag](#highlightpretag) `settings` `search`
+- [highlightPostTag](#highlightposttag) `settings` `search`
+- [snippetEllipsisText](#snippetellipsistext) `settings` `search`
+
+**Pagination**
+- [hitsPerPage](#hitsperpage) `settings` `search`
+
+**Typos**
+- [minWordSizefor1Typo](#minwordsizefor1typo) `settings` `search`
+- [minWordSizefor2Typos](#minwordsizefor2typos) `settings` `search`
+- [typoTolerance](#typotolerance) `settings` `search`
+- [allowTyposOnNumericTokens](#allowtyposonnumerictokens) `settings` `search`
+- [ignorePlurals](#ignoreplurals) `settings` `search`
+- [disableTypoToleranceOnAttributes](#disabletypotoleranceonattributes) `settings` `search`
+- [separatorsToIndex](#separatorstoindex) `settings`
+
+**Query Strategy**
+- [queryType](#querytype) `settings` `search`
+- [removeWordsIfNoResults](#removewordsifnoresults) `settings` `search`
+- [advancedSyntax](#advancedsyntax) `settings` `search`
+- [optionalWords](#optionalwords) `settings` `search`
+- [removeStopWords](#removestopwords) `settings` `search`
+- [disablePrefixOnAttributes](#disableprefixonattributes) `settings`
+- [disableExactOnAttributes](#disableexactonattributes) `settings`
+- [exactOnSingleWordQuery](#exactonsinglewordquery) `settings` `search`
+- [alternativesAsExact](#alternativesasexact) `settings` `search`
+
+**Advanced**
+- [attributeForDistinct](#attributefordistinct) `settings`
+- [distinct](#distinct) `settings`, `search`
+- [numericAttributesToIndex](#numericattributestoindex) `settings`
+- [allowCompressionOfIntegerArray](#allowcompressionofintegerarray) `settings`
+- [altCorrections](#altcorrections) `settings`
+- [placeholders](#placeholders) `settings`
 
 
 ## Parameters
@@ -556,87 +677,89 @@ Each parameter in this page has a scope. Depending on the scope, you can use the
 and/or the `search` method
 
 They are three scopes:
-- `indexing`: The setting can only be used in the `setSettings` method
+- `settings`: The setting can only be used in the `setSettings` method
 - `search`: The setting can only be used in the `search` method
-- `indexing` `search`: The setting can be used in the `setSettings` method and be overriden in the`search` method
+- `settings` `search`: The setting can be used in the `setSettings` method and be override in the`search` method
 
 
 #### Parameters List
 
 **Search**
-- query `search`
+- [query](#query) `search`
 
 **Attributes**
-- attributesToIndex `indexing`
-- attributesForFaceting `indexing`
-- attributesToRetrieve `indexing`
-- unretrievableAttributes `indexing`
-- restrictSearchableAttributes `search`
+- [attributesToIndex](#attributestoindex) `settings`
+- [attributesForFaceting](#attributesforfaceting) `settings`
+- [attributesToRetrieve](#attributestoretrieve) `settings`
+- [unretrievableAttributes](#unretrievableattributes) `settings`
+- [attributesToRetrieve](#attributestoretrieve) `search`
+
 
 **Ranking**
-- ranking `indexing`
-- customRanking `indexing`
-- slaves `indexing`
+- [ranking](#ranking) `settings`
+- [customRanking](#customranking) `settings`
+- [slaves](#slaves) `settings`
 
 **Filtering / Faceting**
-- filters `search`
-- facetFilters `search`
-- maxValuesPerFacet `indexing` `search`
+- [filters](#filters) `search`
+- [facets](#facets) `search`
+- [maxValuesPerFacet](#maxvaluesperfacet) `settings` `search`
 
 **Highlighting / Snippeting**
-- attributesToHighlight `indexing` `search`
-- attributesToSnippet `indexing` `search`
-- highlightPreTag `indexing` `search`
-- highlightPostTag `indexing` `search`
-- snippetEllipsisText `indexing` `search`
+- [attributesToHighlight](#attributestohighlight) `settings` `search`
+- [attributesToSnippet](#attributestosnippet) `settings` `search`
+- [highlightPreTag](#highlightpretag) `settings` `search`
+- [highlightPostTag](#highlightposttag) `settings` `search`
+- [snippetEllipsisText](#snippetellipsistext) `settings` `search`
 
 **Pagination**
-- page `search`
-- hitsPerPage `indexing` `search`
-
-**Synonyms**
-
-- replaceSynonymsInHighlight `indexing` `search`
+- [page](#page) `search`
+- [hitsPerPage](#hitsperpage) `settings` `search`
 
 **Typos**
-- minWordSizefor1Typo `indexing` `search`
-- minWordSizefor2Typos `indexing` `search`
-- typoTolerance `indexing` `search`
-- allowTyposOnNumericTokens `indexing` `search`
-- ignorePlurals `indexing` `search`
-- disableTypoToleranceOnAttributes `indexing` `search`
-- separatorsToIndex `indexing`
+- [minWordSizefor1Typo](#minwordsizefor1typo) `settings` `search`
+- [minWordSizefor2Typos](#minwordsizefor2typos) `settings` `search`
+- [typoTolerance](#typotolerance) `settings` `search`
+- [allowTyposOnNumericTokens](#allowtyposonnumerictokens) `settings` `search`
+- [ignorePlurals](#ignoreplurals) `settings` `search`
+- [disableTypoToleranceOnAttributes](#disabletypotoleranceonattributes) `settings` `search`
+- [separatorsToIndex](#separatorstoindex) `settings`
 
 **Geo-Search**
-- aroundLatLng `search`
-- aroundLatLngViaIP `search`
-- insideBoundingBox `search`
-- insidePolygon `search`
+
+
+- [aroundLatLng](#aroundlatlng) `search`
+
+
+
+- [aroundLatLngViaIP](#aroundlatlngviaip) `search`
+- [insideBoundingBox](#insideboundingbox) `search`
+- [insidePolygon](#insidepolygon) `search`
+
 
 **Query Strategy**
-- queryType `indexing` `search`
-- removeWordsIfNoResults `indexing` `search`
-- advancedSyntax `indexing` `search`
-- optionalWords `indexing` `search`
-- removeStopWords `indexing` `search`
-- disablePrefixOnAttributes `indexing`
-- disableExactOnAttributes `indexing`
-- exactOnSingleWordQuery `indexing` `search`
-- alternativesAsExact `indexing` `search`
+- [queryType](#querytype) `settings` `search`
+- [removeWordsIfNoResults](#removewordsifnoresults) `settings` `search`
+- [advancedSyntax](#advancedsyntax) `settings` `search`
+- [optionalWords](#optionalwords) `settings` `search`
+- [removeStopWords](#removestopwords) `settings` `search`
+- [disablePrefixOnAttributes](#disableprefixonattributes) `settings`
+- [disableExactOnAttributes](#disableexactonattributes) `settings`
+- [exactOnSingleWordQuery](#exactonsinglewordquery) `settings` `search`
+- [alternativesAsExact](#alternativesasexact) `settings` `search`
 
 **Advanced**
-- attributeForDistinct `indexing`
-- distinct `indexing`, `search`
-- getRankingInfo `search`
-- numericAttributesToIndex `indexing`
-- allowCompressionOfIntegerArray `indexing`
-- numericFilters (deprecated) `search`
-- tagFilters (deprecated) `search`
-- facetFilters (deprecated) `search`
-- synonyms (deprecated) `search`
-- analytics `search`
-- altCorrections `indexing`
-- placeholders `indexing`
+- [attributeForDistinct](#attributefordistinct) `settings`
+- [distinct](#distinct) `settings`, `search`
+- [](#) `search`
+- [numericAttributesToIndex](#numericattributestoindex) `settings`
+- [allowCompressionOfIntegerArray](#allowcompressionofintegerarray) `settings`
+- [numericFilters (deprecated)](#numericfilters-deprecated) `search`
+- [tagFilters (deprecated)](#tagfilters-deprecated) `search`
+- [facetFilters (deprecated)](#facetfilters-deprecated) `search`
+- [analytics](#analytics) `search`
+- [altCorrections](#altcorrections) `settings`
+- [placeholders](#placeholders) `settings`
 
 ### Search
 
@@ -653,7 +776,7 @@ The instant search query string, used to set the string you want to search in yo
 
 #### attributesToIndex
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 
 The list of attributes you want index (i.e. to make searchable).
@@ -682,7 +805,7 @@ To get a full description of how the Ranking works, you can have a look at our
 
 #### attributesForFaceting
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 
 The list of fields you want to use for faceting.
@@ -692,7 +815,7 @@ If set to null, no attribute is used for faceting.
 
 #### unretrievableAttributes
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 - default: `null`
 
@@ -704,7 +827,7 @@ and/or ranking but cannot be retrieved
 
 #### attributesToRetrieve
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `array of strings`
 
 A string that contains the list of attributes you want to retrieve in order to minimize the size of the JSON answer.
@@ -733,7 +856,7 @@ By default, all attributes specified in the `attributesToIndex` settings are use
 
 #### ranking
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 - default: `['typo', 'geo', 'words', 'filters', 'proximity', 'attribute', 'exact', 'custom‘]`
 
@@ -758,7 +881,7 @@ you can have a look at our [Ranking guide](https://www.algolia.com/doc/relevance
 
 #### customRanking
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 - default: `[]`
 
@@ -774,7 +897,7 @@ you can have a look at our [Ranking guide](https://www.algolia.com/doc/relevance
 
 #### slaves
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 - default: `[]`
 
@@ -848,7 +971,7 @@ the attribute `exhaustiveFacetsCount` in the response is true when the count is 
 
 #### maxValuesPerFacet
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `integer`
 - default: `""`
 
@@ -860,7 +983,7 @@ For example, `maxValuesPerFacet=10` will retrieve a maximum of 10 values per fac
 
 #### attributesToHighlight
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `array of strings`
 - default: `null`
 
@@ -881,7 +1004,7 @@ A matchLevel is returned for each highlighted attribute and can contain:
 
 #### attributesToSnippet
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `array of strings`
 - default: `null`
 
@@ -890,7 +1013,7 @@ If set to null, no snippet is computed.
 
 #### highlightPreTag
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: `<em>`
 
@@ -900,7 +1023,7 @@ Specify the string that is inserted before the highlighted parts in the query re
 
 #### highlightPostTag
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: `<em>`
 
@@ -930,7 +1053,7 @@ Page is zero based and defaults to 0. Thus, to retrieve the 10th page you need t
 
 #### hitsPerPage
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `integer`
 - default: `20`
 
@@ -940,7 +1063,7 @@ Pagination parameter used to select the number of hits per page. Defaults to 20.
 
 #### minWordSizefor1Typo
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `integer`
 - default: `4`
 
@@ -948,7 +1071,7 @@ The minimum number of characters needed to accept one typo.
 
 #### minWordSizefor2Typos
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `integer`
 - default: `8`
 
@@ -957,7 +1080,7 @@ The minimum number of characters needed to accept two typos.
 
 #### typoTolerance
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `boolean`
 - default: `true`
 
@@ -971,7 +1094,7 @@ This option allows you to control the number of typos allowed in the result set:
 
 #### allowTyposOnNumericTokens
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `boolean`
 - default: `true`
 
@@ -979,7 +1102,7 @@ If set to false, disables typo tolerance on numeric tokens (numbers).
 
 #### ignorePlurals
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `boolean`
 - default: `false`
 
@@ -987,7 +1110,7 @@ If set to true, plural won't be considered as a typo. For example, car and cars,
 
 #### disableTypoToleranceOnAttributes
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: ``
 
@@ -999,7 +1122,7 @@ You can also use JSON string array encoding such as `encodeURIComponent("[\"name
 
 #### separatorsToIndex
 
-- scope: `indexing`
+- scope: `settings`
 - type: `string`
 - default: `empty`
 
@@ -1106,7 +1229,7 @@ if you have several geo-locations in your record).
 
 #### queryType
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - default: `prefixLast`
 
 Selects how the query words are interpreted. It can be one of the following values:
@@ -1119,7 +1242,7 @@ No query word is interpreted as a prefix. This option is not recommended.
 
 #### removeWordsIfNoResults
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: `none`
 
@@ -1140,7 +1263,7 @@ No specific processing is done when a query does not return any results (default
 
 #### advancedSyntax
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - default: `0 (false)`
 
 Enables the advanced query syntax.
@@ -1152,7 +1275,7 @@ This syntax allow to do two things:
 
 #### optionalWords
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - default: `[]`
 
 A string that contains the comma separated list of words that should be considered as optional when found in the query.
@@ -1160,7 +1283,7 @@ A string that contains the comma separated list of words that should be consider
 
 #### removeStopWords
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - default: `false`
 
 Remove stop words from the query **before** executing it. Defaults to `false`.
@@ -1187,7 +1310,7 @@ For most use cases, it is better to not use this feature as people search by key
 
 #### disablePrefixOnAttributes
 
-- scope: `indexing`
+- scope: `settings`
 - type: `string array`
 - default: `[]`
 
@@ -1200,7 +1323,7 @@ This setting is useful on attributes that contain string that should not be matc
 
 #### disableExactOnAttributes
 
-- scope: `indexing`
+- scope: `settings`
 - type: `string array`
 - default: `[]`
 
@@ -1209,7 +1332,7 @@ List of attributes on which you want to disable the computation of `exact` crite
 
 #### exactOnSingleWordQuery
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: `attribute`
 
@@ -1220,7 +1343,7 @@ This parameter control how the `exact` ranking criterion is computed when the qu
 
 #### alternativesAsExact
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `string`
 - default: `["ignorePlurals", "singleWordSynonym"]`
 
@@ -1234,7 +1357,7 @@ Specify the list of approximation that should be considered as an exact match in
 
 #### attributeForDistinct
 
-- scope: `indexing`
+- scope: `settings`
 - type: `string`
 
 The name of the attribute used for the `Distinct` feature.
@@ -1252,7 +1375,7 @@ you can have a look at our [guide on distinct](https://www.algolia.com/doc/searc
 
 #### distinct
 
-- scope: `indexing`, `search`
+- scope: `settings`, `search`
 - type: `boolean`
 - default: `false`
 
@@ -1280,7 +1403,7 @@ the result hits will contain ranking information in the **_rankingInfo** attribu
 
 #### numericAttributesToIndex
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of strings`
 
 All numerical attributes are automatically indexed as numerical filters
@@ -1294,7 +1417,7 @@ The other operators will be disabled.
 
 #### allowCompressionOfIntegerArray
 
-- scope: `indexing`
+- scope: `settings`
 - type: `boolean`
 - default: `false`
 
@@ -1370,7 +1493,7 @@ For example, `[["category:Book","category:Movie"],"author:John%20Doe"]`.
 
 #### analytics
 
-- scope: `indexing`
+- scope: `settings`
 - type: `boolean`
 - default: `true`
 
@@ -1378,7 +1501,7 @@ If set to false, this query will not be taken into account in the analytics feat
 
 #### placeholders
 
-- scope: `indexing`
+- scope: `settings`
 - type: `hash of array of words`
 
 This is an advanced use-case to define a token substitutable by a list of words
@@ -1398,7 +1521,7 @@ For example:
 
 #### altCorrections
 
-- scope: `indexing`
+- scope: `settings`
 - type: `array of objects`
 - defaults: `[]`
 
