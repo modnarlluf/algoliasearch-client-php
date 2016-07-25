@@ -28,6 +28,8 @@
 namespace AlgoliaSearch;
 
 use AlgoliaSearch\Exception\AlgoliaDisjunctiveFacetsInvalidException;
+use AlgoliaSearch\Exception\AlgoliaRecordsTooBigException;
+use AlgoliaSearch\Exception\AlgoliaRecordTooBigException;
 use AlgoliaSearch\Exception\AlgoliaRefinementsInvalidException;
 
 /*
@@ -36,6 +38,9 @@ use AlgoliaSearch\Exception\AlgoliaRefinementsInvalidException;
  */
 class Index
 {
+    const BATCH_MODE_SIMPLE = 0;
+    const BATCH_MODE_CHUNK = 1;
+
     /**
      * @var ClientContext
      */
@@ -144,6 +149,7 @@ class Index
                 $this->context->readTimeout
             );
         }
+
 
         return $this->client->request(
             $this->context,
@@ -315,16 +321,60 @@ class Index
     /**
      * Override the content of several objects.
      *
-     * @param array  $objects     contains an array of objects to update (each object must contains a objectID attribute)
-     * @param string $objectIDKey
+     * @param array   $objects     contains an array of objects to update (each object must contains a objectID attribute)
+     * @param string  $objectIDKey
+     * @param integer $mode
+     * @param integer $chunkSize
      *
      * @return mixed
+     * @throws AlgoliaException
      */
-    public function saveObjects($objects, $objectIDKey = 'objectID')
+    public function saveObjects($objects, $objectIDKey = 'objectID', $mode = self::BATCH_MODE_SIMPLE, $chunkSize = 1024)
     {
         $requests = $this->buildBatch('updateObject', $objects, true, $objectIDKey);
 
-        return $this->batch($requests);
+        if ($mode === self::BATCH_MODE_CHUNK) {
+            $tasks = [];
+            $chunks = array_chunk($requests['requests'], $chunkSize);
+
+            while ($chunks) {
+                $chunk = array_shift($chunks);
+
+                try {
+                    $tasks[] = $this->batch(['requests' => $chunk]);
+                } catch (AlgoliaRecordTooBigException $e) {
+                    if (!isset($exception)) {
+                        $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
+                    }
+
+                    if (1 === count($chunk)) {
+                        $record = $e->getRecord();
+                        $exception->addRecord($record['requests'][0]['body']);
+                    } else {
+                        $newChunks = array_chunk($chunk, 1 + count($chunk) >> 1);
+                        $chunks = array_merge($chunks, $newChunks);
+                    }
+                }
+            }
+
+            if (isset($exception)) {
+
+                throw $exception;
+            }
+
+            return $tasks;
+        } else {
+            try {
+
+                return $this->batch($requests);
+            } catch (AlgoliaRecordTooBigException $e) {
+                $record = $e->getRecord();
+                $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
+                $exception->addRecord($record['requests'][0]['body']);
+
+                throw $exception;
+            }
+        }
     }
 
     /**

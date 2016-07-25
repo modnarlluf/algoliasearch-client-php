@@ -5,6 +5,7 @@ namespace AlgoliaSearch\Tests;
 use AlgoliaSearch\AlgoliaException;
 use AlgoliaSearch\Client;
 use AlgoliaSearch\Exception\AlgoliaIndexNotFoundException;
+use AlgoliaSearch\Exception\AlgoliaRecordsTooBigException;
 use AlgoliaSearch\Exception\AlgoliaRecordTooBigException;
 use AlgoliaSearch\Index;
 
@@ -38,12 +39,33 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaRecordTooBigException');
 
         $contacts = file_get_contents(__DIR__.'/../../../contacts.json');
-        $object = array('contacts' => $contacts);
+        $object = array('objectID' => '0', 'contacts' => $contacts);
 
         try {
             $this->index->addObject($object);
         } catch (AlgoliaRecordTooBigException $e) {
             $this->assertEquals($object, $e->getRecord());
+
+            throw $e;
+        }
+    }
+
+    public function testRecordsTooBig()
+    {
+        $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaRecordsTooBigException');
+
+        $contacts = file_get_contents(__DIR__.'/../../../contacts.json');
+        $wrongObject = array('objectID' => '0', 'contacts' => $contacts);
+        $objects = array(
+            array('objectID' => '1', 'contacts' => 'empty'),
+            $wrongObject,
+        );
+
+        try {
+            $this->index->saveObjects($objects, 'objectID', Index::BATCH_MODE_CHUNK);
+        } catch (AlgoliaRecordsTooBigException $e) {
+            $this->assertEquals(count($e->getRecords()), 1);
+            $this->assertEquals([$wrongObject], $e->getRecords());
 
             throw $e;
         }
