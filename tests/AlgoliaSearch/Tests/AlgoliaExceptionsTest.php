@@ -4,8 +4,8 @@ namespace AlgoliaSearch\Tests;
 
 use AlgoliaSearch\AlgoliaException;
 use AlgoliaSearch\Client;
+use AlgoliaSearch\Exception\AlgoliaBatchException;
 use AlgoliaSearch\Exception\AlgoliaIndexNotFoundException;
-use AlgoliaSearch\Exception\AlgoliaRecordsTooBigException;
 use AlgoliaSearch\Exception\AlgoliaRecordTooBigException;
 use AlgoliaSearch\Index;
 
@@ -50,9 +50,9 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         }
     }
 
-    public function testRecordsTooBig()
+    public function testBatchException()
     {
-        $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaRecordsTooBigException');
+        $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaBatchException');
 
         $contacts = file_get_contents(__DIR__.'/../../../contacts.json');
         $contacts2 = array_fill(0, 5, $contacts);
@@ -64,7 +64,7 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         );
 
         $goodObjects = array(
-            array('objectID' => '0', 'contacts' => 'empty'),
+            array('objectID' => '0', 'contacts' => ''),
         );
 
         $objects = array_merge($goodObjects, $wrongObjects);
@@ -72,13 +72,17 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
 
         try {
             $this->index->saveObjects($objects, 'objectID', $options);
-        } catch (AlgoliaRecordsTooBigException $e) {
-            $this->assertEquals(count($e->getRecords()), count($wrongObjects));
+        } catch (AlgoliaBatchException $e) {
+            $this->assertEquals(count($e->getExceptions()), count($wrongObjects));
 
-            $records = $e->getRecords();
+            $records = $e->getExceptions();
+            array_walk($records, function(&$exception) {
+                $exception = $exception->getRecord();
+            });
+
             $ids = array();
-            foreach ($records as $k => $id) {
-                $ids[$k] = $id['objectID'];
+            foreach ($records as $k => $record) {
+                $ids[$k] = $record['objectID'];
             }
             array_multisort($ids, SORT_ASC, $records);
             $this->assertEquals($wrongObjects, $records);

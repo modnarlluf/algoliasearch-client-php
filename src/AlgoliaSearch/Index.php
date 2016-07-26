@@ -27,8 +27,9 @@
 
 namespace AlgoliaSearch;
 
+use AlgoliaSearch\Exception\AlgoliaBatchException;
 use AlgoliaSearch\Exception\AlgoliaDisjunctiveFacetsInvalidException;
-use AlgoliaSearch\Exception\AlgoliaRecordsTooBigException;
+use AlgoliaSearch\Exception\AlgoliaRecordException;
 use AlgoliaSearch\Exception\AlgoliaRecordTooBigException;
 use AlgoliaSearch\Exception\AlgoliaRefinementsInvalidException;
 
@@ -1051,16 +1052,20 @@ class Index
 
                 try {
                     $tasks[] = $this->doBatch(array('requests' => $chunk));
-                } catch (AlgoliaRecordTooBigException $e) {
+                } catch (AlgoliaException $e) {
                     if (!isset($exception)) {
-                        $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
+                        $exception = new AlgoliaBatchException($e->getMessage());
+                    }
+
+                    if ($e instanceof AlgoliaRecordException) {
+                        $record = $e->getRecord();
+                        $e->setRecord($record['requests'][0]['body']);
                     }
 
                     $chunkCount = count($chunk);
                     if (1 === $chunkCount) {
-                        $record = $e->getRecord();
-                        $exception->addRecord($record['requests'][0]['body']);
-                    } else {
+                        $exception->addException($e);
+                    } elseif ($chunkCount > 1) {
                         $newChunks = array_chunk($chunk, $chunkCount % 2 + $chunkCount >> 1);
                         $chunks = array_merge($chunks, $newChunks);
                     }
@@ -1068,7 +1073,6 @@ class Index
             }
 
             if (isset($exception)) {
-
                 throw $exception;
             }
 
