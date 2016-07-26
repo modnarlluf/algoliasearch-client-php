@@ -55,17 +55,33 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaRecordsTooBigException');
 
         $contacts = file_get_contents(__DIR__.'/../../../contacts.json');
-        $wrongObject = array('objectID' => '0', 'contacts' => $contacts);
-        $objects = array(
-            array('objectID' => '1', 'contacts' => 'empty'),
-            $wrongObject,
+        $contacts2 = array_fill(0, 5, $contacts);
+
+        $wrongObjects = array(
+            array('objectID' => '1', 'contacts' => $contacts),
+            array('objectID' => '2', 'contacts' => $contacts2),
+            array('objectID' => '3', 'contacts' => $contacts),
         );
 
+        $goodObjects = array(
+            array('objectID' => '0', 'contacts' => 'empty'),
+        );
+
+        $objects = array_merge($goodObjects, $wrongObjects);
+        $options = array('batch_mode' => Index::BATCH_MODE_CHUNK);
+
         try {
-            $this->index->saveObjects($objects, 'objectID', Index::BATCH_MODE_CHUNK);
+            $this->index->saveObjects($objects, 'objectID', $options);
         } catch (AlgoliaRecordsTooBigException $e) {
-            $this->assertEquals(count($e->getRecords()), 1);
-            $this->assertEquals([$wrongObject], $e->getRecords());
+            $this->assertEquals(count($e->getRecords()), count($wrongObjects));
+
+            $records = $e->getRecords();
+            $ids = array();
+            foreach ($records as $k => $id) {
+                $ids[$k] = $id['objectID'];
+            }
+            array_multisort($ids, SORT_ASC, $records);
+            $this->assertEquals($wrongObjects, $records);
 
             throw $e;
         }

@@ -86,12 +86,13 @@ class Index
      * @param string $objectIDKey     the key in each object that contains the objectID
      * @param string $objectActionKey the key in each object that contains the action to perform (addObject, updateObject,
      *                                deleteObject or partialUpdateObject)
+     * @param array  $options         an associative array defining the batch mode and options
      *
      * @return mixed
      *
      * @throws \Exception
      */
-    public function batchObjects($objects, $objectIDKey = 'objectID', $objectActionKey = 'objectAction')
+    public function batchObjects($objects, $objectIDKey = 'objectID', $objectActionKey = 'objectAction', $options = array())
     {
         $requests = array();
         $allowedActions = array(
@@ -122,7 +123,7 @@ class Index
             $requests[] = $req;
         }
 
-        return $this->batch(array('requests' => $requests));
+        return $this->batch(array('requests' => $requests), $options);
     }
 
     /**
@@ -168,14 +169,15 @@ class Index
      *
      * @param array  $objects     contains an array of objects to add. If the object contains an objectID
      * @param string $objectIDKey
+     * @param array  $options     an associative array defining the batch mode and options
      *
      * @return mixed
      */
-    public function addObjects($objects, $objectIDKey = 'objectID')
+    public function addObjects($objects, $objectIDKey = 'objectID', $options = array())
     {
         $requests = $this->buildBatch('addObject', $objects, true, $objectIDKey);
 
-        return $this->batch($requests);
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -281,10 +283,11 @@ class Index
      * @param array  $objects           contains an array of objects to update (each object must contains a objectID attribute)
      * @param string $objectIDKey
      * @param bool   $createIfNotExists
+     * @param array  $options           an associative array defining the batch mode and options
      *
      * @return mixed
      */
-    public function partialUpdateObjects($objects, $objectIDKey = 'objectID', $createIfNotExists = true)
+    public function partialUpdateObjects($objects, $objectIDKey = 'objectID', $createIfNotExists = true, $options = array())
     {
         if ($createIfNotExists) {
             $requests = $this->buildBatch('partialUpdateObject', $objects, true, $objectIDKey);
@@ -292,7 +295,7 @@ class Index
             $requests = $this->buildBatch('partialUpdateObjectNoCreate', $objects, true, $objectIDKey);
         }
 
-        return $this->batch($requests);
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -321,60 +324,17 @@ class Index
     /**
      * Override the content of several objects.
      *
-     * @param array   $objects     contains an array of objects to update (each object must contains a objectID attribute)
-     * @param string  $objectIDKey
-     * @param integer $mode
-     * @param integer $chunkSize
+     * @param array  $objects     contains an array of objects to update (each object must contains a objectID attribute)
+     * @param string $objectIDKey
+     * @param array  $options     an associative array defining the batch mode and options
      *
      * @return mixed
-     * @throws AlgoliaException
      */
-    public function saveObjects($objects, $objectIDKey = 'objectID', $mode = self::BATCH_MODE_SIMPLE, $chunkSize = 1024)
+    public function saveObjects($objects, $objectIDKey = 'objectID', $options = array())
     {
         $requests = $this->buildBatch('updateObject', $objects, true, $objectIDKey);
 
-        if ($mode === self::BATCH_MODE_CHUNK) {
-            $tasks = [];
-            $chunks = array_chunk($requests['requests'], $chunkSize);
-
-            while ($chunks) {
-                $chunk = array_shift($chunks);
-
-                try {
-                    $tasks[] = $this->batch(['requests' => $chunk]);
-                } catch (AlgoliaRecordTooBigException $e) {
-                    if (!isset($exception)) {
-                        $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
-                    }
-
-                    if (1 === count($chunk)) {
-                        $record = $e->getRecord();
-                        $exception->addRecord($record['requests'][0]['body']);
-                    } else {
-                        $newChunks = array_chunk($chunk, 1 + count($chunk) >> 1);
-                        $chunks = array_merge($chunks, $newChunks);
-                    }
-                }
-            }
-
-            if (isset($exception)) {
-
-                throw $exception;
-            }
-
-            return $tasks;
-        } else {
-            try {
-
-                return $this->batch($requests);
-            } catch (AlgoliaRecordTooBigException $e) {
-                $record = $e->getRecord();
-                $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
-                $exception->addRecord($record['requests'][0]['body']);
-
-                throw $exception;
-            }
-        }
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -409,10 +369,11 @@ class Index
      * Delete several objects.
      *
      * @param array $objects contains an array of objectIDs to delete. If the object contains an objectID
+     * @param array $options an associative array defining the batch mode and options
      *
      * @return mixed
      */
-    public function deleteObjects($objects)
+    public function deleteObjects($objects, $options = array())
     {
         $objectIDs = array();
         foreach ($objects as $key => $id) {
@@ -420,7 +381,7 @@ class Index
         }
         $requests = $this->buildBatch('deleteObject', $objectIDs, true);
 
-        return $this->batch($requests);
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -1061,11 +1022,63 @@ class Index
     /**
      * Send a batch request.
      *
-     * @param array $requests an associative array defining the batch request body
+     * @param array   $requests      an associative array defining the batch request body
+     * @param array   $options       an associative array defining the batch mode and options
      *
      * @return mixed
+     * @throws AlgoliaException
      */
-    public function batch($requests)
+    public function batch($requests, $options = array())
+    {
+        $mode = isset($options['batch_mode']) ? $options['batch_mode'] : self::BATCH_MODE_SIMPLE;
+
+        if ($mode === self::BATCH_MODE_SIMPLE) {
+            try {
+
+                return $this->doBatch($requests);
+            } catch (AlgoliaRecordTooBigException $e) {
+                $records = $e->getRecord();
+                $e->setRecord($records['requests'][0]['body']);
+
+                throw $e;
+            }
+        } elseif ($mode === self::BATCH_MODE_CHUNK) {
+            $tasks = array();
+            $chunks = array($requests['requests']);
+
+            while ($chunks) {
+                $chunk = array_shift($chunks);
+
+                try {
+                    $tasks[] = $this->doBatch(array('requests' => $chunk));
+                } catch (AlgoliaRecordTooBigException $e) {
+                    if (!isset($exception)) {
+                        $exception = new AlgoliaRecordsTooBigException($e->getMessage(), $e->getCode(), $e);
+                    }
+
+                    $chunkCount = count($chunk);
+                    if (1 === $chunkCount) {
+                        $record = $e->getRecord();
+                        $exception->addRecord($record['requests'][0]['body']);
+                    } else {
+                        $newChunks = array_chunk($chunk, $chunkCount % 2 + $chunkCount >> 1);
+                        $chunks = array_merge($chunks, $newChunks);
+                    }
+                }
+            }
+
+            if (isset($exception)) {
+
+                throw $exception;
+            }
+
+            return $tasks;
+        }
+
+        throw new AlgoliaException('Unkown batch_mode: '. intval($mode));
+    }
+
+    public function doBatch($requests)
     {
         return $this->client->request(
             $this->context,
