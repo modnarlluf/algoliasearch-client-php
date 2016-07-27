@@ -50,7 +50,7 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         }
     }
 
-    public function testBatchException()
+    public function testBatch()
     {
         $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaBatchException');
 

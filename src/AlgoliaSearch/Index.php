@@ -27,8 +27,10 @@
 
 namespace AlgoliaSearch;
 
+use AlgoliaSearch\Exception\AlgoliaBatchException;
 use AlgoliaSearch\Exception\AlgoliaDisjunctiveFacetsInvalidException;
 use AlgoliaSearch\Exception\AlgoliaRefinementsInvalidException;
+use AlgoliaSearch\Exception\AlgoliaRequestsBatchException;
 
 /*
  * Contains all the functions related to one index
@@ -36,6 +38,9 @@ use AlgoliaSearch\Exception\AlgoliaRefinementsInvalidException;
  */
 class Index
 {
+    const BATCH_MODE_SIMPLE = 0;
+    const BATCH_MODE_CHUNK = 1;
+
     /**
      * @var ClientContext
      */
@@ -162,14 +167,15 @@ class Index
      *
      * @param array  $objects     contains an array of objects to add. If the object contains an objectID
      * @param string $objectIDKey
+     * @param array  $options
      *
      * @return mixed
      */
-    public function addObjects($objects, $objectIDKey = 'objectID')
+    public function addObjects($objects, $objectIDKey = 'objectID', $options = array())
     {
         $requests = $this->buildBatch('addObject', $objects, true, $objectIDKey);
 
-        return $this->batch($requests);
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -317,14 +323,15 @@ class Index
      *
      * @param array  $objects     contains an array of objects to update (each object must contains a objectID attribute)
      * @param string $objectIDKey
+     * @param array  $options
      *
      * @return mixed
      */
-    public function saveObjects($objects, $objectIDKey = 'objectID')
+    public function saveObjects($objects, $objectIDKey = 'objectID', $options = array())
     {
         $requests = $this->buildBatch('updateObject', $objects, true, $objectIDKey);
 
-        return $this->batch($requests);
+        return $this->batch($requests, $options);
     }
 
     /**
@@ -1012,10 +1019,74 @@ class Index
      * Send a batch request.
      *
      * @param array $requests an associative array defining the batch request body
+     * @param array $options  batch options
+     *
+     * @return mixed
+     * @throws AlgoliaException
+     */
+    public function batch($requests, $options = array())
+    {
+        if (isset($options['batch_mode'])) {
+            $requests = $requests['requests'];
+
+            if ($options['batch_mode'] === self::BATCH_MODE_CHUNK) {
+                $tasks = array();
+                $chunkSize = isset($options['chunk_size']) ? $options['chunk_size'] : 1024;
+                $chunkSize = 2;
+                $chunks = array_chunk($requests, $chunkSize);
+
+                while ($chunks) {
+                    $chunk = array_shift($chunks);
+
+                    try {
+                        $tasks[] = $this->doBatch(array('requests' => $chunk));
+                    } catch (AlgoliaRequestsBatchException $e) {
+                        if (!isset($exception)) {
+                            $exception = new AlgoliaBatchException($e->getMessage());
+                        }
+
+                        $chunkSize = count($chunk);
+
+                        if ($chunkSize === 1) {
+                            $requests = $e->getRequests();
+                            $exception->addRecord($requests[0]['body']);
+                        } else {
+                            $newChunks = array_chunk($chunk, (int) ($chunkSize % 2 + $chunkSize > 1));
+                            $chunks = array_merge($chunks, $newChunks);
+                        }
+                    }
+                }
+
+                if (isset($exception)) {
+                    throw $exception;
+                }
+
+                return $tasks;
+            } else {
+
+                throw new AlgoliaException('Unkown batch mode: '. $options['batch_mode']);
+            }
+
+        } else {
+            try {
+                return $this->doBatch($requests);
+            } catch (AlgoliaRequestsBatchException $e) {
+                $exception = new AlgoliaBatchException($e->getMessage());
+                foreach ($e->getRequests() as $request) {
+                    $exception->addRecord($request['body']);
+                }
+
+                throw $exception;
+            }
+        }
+    }
+
+    /**
+     * @param $requests
      *
      * @return mixed
      */
-    public function batch($requests)
+    protected function doBatch($requests)
     {
         return $this->client->request(
             $this->context,

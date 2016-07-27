@@ -27,9 +27,9 @@
 
 namespace AlgoliaSearch;
 
-use AlgoliaSearch\Exception\AlgoliaBatchException;
 use AlgoliaSearch\Exception\AlgoliaRecordTooBigException;
 use AlgoliaSearch\Exception\AlgoliaIndexNotFoundException;
+use AlgoliaSearch\Exception\AlgoliaRequestsBatchException;
 
 /**
  * Entry point in the PHP API.
@@ -1041,10 +1041,8 @@ class Client
         $message = isset($answer['message']) ? $answer['message'] : $http_status . ' error';
 
         if (substr($path, -6) === '/batch') {
-            $exception = new AlgoliaBatchException($message);
-            foreach ($data['requests'] as $request) {
-                $exception->addRecord($request['body']);
-            }
+            $exception = new AlgoliaRequestsBatchException($message);
+            $exception->setRequests($data['requests']);
 
             return $exception;
         }

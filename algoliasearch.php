@@ -30,6 +30,7 @@ require_once 'src/AlgoliaSearch/Exception/AlgoliaDisjunctiveFacetsInvalidExcepti
 require_once 'src/AlgoliaSearch/Exception/AlgoliaIndexNotFoundException.php';
 require_once 'src/AlgoliaSearch/Exception/AlgoliaRecordTooBigException.php';
 require_once 'src/AlgoliaSearch/Exception/AlgoliaRefinementsInvalidException.php';
+require_once 'src/AlgoliaSearch/Exception/AlgoliaRequestsBatchException.php';
 require_once 'src/AlgoliaSearch/Client.php';
 require_once 'src/AlgoliaSearch/ClientContext.php';
 require_once 'src/AlgoliaSearch/Index.php';
