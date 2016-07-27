@@ -1037,11 +1037,13 @@ class Index
             try {
 
                 return $this->doBatch($requests);
-            } catch (AlgoliaRecordTooBigException $e) {
+            } catch (AlgoliaRecordException $e) {
+                $exception = new AlgoliaBatchException($e->getMessage(), $e->getCode(), $e);
+
                 $records = $e->getRecord();
                 $e->setRecord($records['requests'][0]['body']);
 
-                throw $e;
+                throw $exception;
             }
         } elseif ($mode === self::BATCH_MODE_CHUNK) {
             $tasks = array();
