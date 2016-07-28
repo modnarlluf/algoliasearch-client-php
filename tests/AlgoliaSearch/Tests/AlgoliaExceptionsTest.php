@@ -64,7 +64,31 @@ class AlgoliaExceptionsTest extends AlgoliaSearchTestCase
         try {
             $this->index->addObjects($objects);
         } catch (AlgoliaBatchException $e) {
-            $this->assertEquals($e->getRecords(), $objects);
+            $this->assertSame($e->getRecords(), $objects);
+
+            throw $e;
+        }
+    }
+
+    public function testBatchModeChunk()
+    {
+        $this->setExpectedException('AlgoliaSearch\Exception\AlgoliaBatchException');
+
+        $data = file_get_contents(__DIR__.'/../../../contacts.json');
+        $objectsBad = array(
+            array('contacts' => $data),
+            array('contacts' => $data),
+        );
+        $objectsGood = array(
+            array('contacts' => null)
+        );
+
+        $objects = array_merge($objectsBad, $objectsGood);
+
+        try {
+            $this->index->addObjects($objects, 'objectID', array('batch_mode' => Index::BATCH_MODE_CHUNK));
+        } catch (AlgoliaBatchException $e) {
+            $this->assertSame($e->getRecords(), $objectsBad);
 
             throw $e;
         }
