@@ -1032,7 +1032,6 @@ class Index
             if ($options['batch_mode'] === self::BATCH_MODE_CHUNK) {
                 $tasks = array();
                 $chunkSize = isset($options['chunk_size']) ? $options['chunk_size'] : 1024;
-                $chunkSize = 2;
                 $chunks = array_chunk($requests, $chunkSize);
 
                 while ($chunks) {
@@ -1046,7 +1045,6 @@ class Index
                         }
 
                         $chunkSize = count($chunk);
-
                         if ($chunkSize === 1) {
                             $requests = $e->getRequests();
                             $exception->addRecord($requests[0]['body']);
